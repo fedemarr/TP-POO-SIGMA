@@ -1,0 +1,98 @@
+@startuml casos-de-uso
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor White
+  BorderColor Black
+}
+
+actor "Vecino" as VEC
+actor "Administrador" as ADM
+actor "Guardia de seguridad" as GUA
+actor "Empleado de mantenimiento" as EMP
+
+rectangle "SIGMA - Gestion del barrio Los Aromos" {
+
+  package "Reclamos" {
+    usecase "CU-01 Registrar reclamo" as CU01
+    usecase "CU-02 Validar autorizacion del solicitante" as CU02
+    usecase "CU-03 Asignar reclamo a empleado" as CU03
+    usecase "CU-04 Actualizar estado del reclamo" as CU04
+    usecase "CU-05 Consultar seguimiento de reclamo" as CU05
+    usecase "CU-06 Reabrir reclamo resuelto" as CU06
+    usecase "CU-07 Consultar reclamos pendientes" as CU07
+    usecase "CU-08 Escalar reclamo de prioridad alta" as CU08
+    usecase "CU-27 Agregar comentario a reclamo" as CU27
+  }
+
+  package "Expensas y pagos" {
+    usecase "CU-09 Emitir expensas del periodo" as CU09
+    usecase "CU-10 Calcular expensa del lote" as CU10
+    usecase "CU-11 Notificar morosidad" as CU11
+    usecase "CU-12 Registrar pago" as CU12
+    usecase "CU-13 Imputar pago a periodos adeudados" as CU13
+    usecase "CU-14 Aplicar interes por mora" as CU14
+    usecase "CU-15 Registrar ajuste de pago" as CU15
+    usecase "CU-16 Consultar estado de cuenta del lote" as CU16
+  }
+
+  package "Equipos y mantenimiento" {
+    usecase "CU-17 Registrar falla de equipo" as CU17
+    usecase "CU-18 Generar orden de mantenimiento" as CU18
+    usecase "CU-19 Cerrar orden de mantenimiento" as CU19
+    usecase "CU-20 Consultar estado de equipos" as CU20
+  }
+
+  package "Visitas" {
+    usecase "CU-21 Autorizar visita" as CU21
+    usecase "CU-22 Registrar ingreso de visita" as CU22
+    usecase "CU-23 Verificar autorizacion vigente" as CU23
+    usecase "CU-24 Registrar egreso de visita" as CU24
+  }
+
+  package "Reportes" {
+    usecase "CU-25 Emitir reporte de morosidad" as CU25
+    usecase "CU-26 Emitir reporte de equipos fuera de servicio" as CU26
+  }
+}
+
+VEC --> CU01
+VEC --> CU05
+VEC --> CU06
+VEC --> CU27
+VEC --> CU16
+VEC --> CU17
+VEC --> CU21
+
+ADM --> CU03
+ADM --> CU04
+ADM --> CU07
+ADM --> CU09
+ADM --> CU12
+ADM --> CU15
+ADM --> CU18
+ADM --> CU20
+ADM --> CU25
+ADM --> CU26
+
+GUA --> CU17
+GUA --> CU22
+GUA --> CU24
+
+EMP --> CU04
+EMP --> CU19
+EMP --> CU27
+
+CU01 ..> CU02 : <<include>>
+CU09 ..> CU10 : <<include>>
+CU12 ..> CU13 : <<include>>
+CU17 ..> CU18 : <<include>>
+CU22 ..> CU23 : <<include>>
+
+CU06 ..> CU05 : <<extend>>
+CU08 ..> CU07 : <<extend>>
+CU11 ..> CU09 : <<extend>>
+CU14 ..> CU12 : <<extend>>
+
+@enduml
