@@ -19,7 +19,12 @@ Inicio de la etapa 1. Incluye 4 actores, 21 requerimientos funcionales, 20 regla
 
 ## Equipo
 
-Integrantes, comisión y docente: pendientes de completar por el equipo.
+Luagro Lautaro 1222389
+Federico Martinez 1181299
+Joaquin Rodrigues
+
+Materia: Programacion Orientada a Objetos
+Docente: Leon Maria Angela 
 
 ## Próximo paso
 
