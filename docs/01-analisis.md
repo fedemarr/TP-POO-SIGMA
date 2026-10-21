@@ -65,18 +65,13 @@ Borrador de la etapa 1, integrado a partir del trabajo previo del equipo. Los su
 
 ## 1.4 Supuestos adoptados
 
-El enunciado pide documentar todo lo que no figure. Estos son los que tomamos:
+Para completar los detalles que no especifica el enunciado, se adoptan los siguientes supuestos:
 
 | Código | Supuesto |
 | --- | --- |
-| SUP-01 | El coeficiente de participación del lote se calcula como su superficie sobre la superficie total del barrio, y se recalcula solo si cambia la superficie |
-| SUP-02 | El presupuesto mensual del barrio es un dato de entrada que carga el administrador antes de emitir las expensas |
-| SUP-03 | El administrador es un empleado del barrio con su propio legajo y fecha de ingreso |
-| SUP-04 | Los 150 lotes son fijos: no se dan de alta ni de baja durante la operación del sistema |
-| SUP-05 | El interés punitorio del 3 % mensual se calcula proporcional a los días de atraso sobre el saldo impago |
-| SUP-06 | Las validaciones por tiempo (escalado a las 24 horas, cierre a los 5 días, aviso de cámara a las 48 horas) se evalúan cuando el administrador consulta los reclamos o los equipos, porque el sistema no tiene un proceso de ejecución programada |
-| SUP-07 | La orden de mantenimiento se genera automáticamente al registrarse una falla, con la prioridad que define RN-14; el administrador luego le asigna el técnico |
-| SUP-08 | Una persona autorizada por el titular se registra como residente del lote con tipo familiar o inquilino |
-| SUP-09 | La notificación formal al titular moroso y los avisos al administrador se registran en el sistema y se muestran por pantalla, sin envío real de correo |
-| SUP-10 | Los reportes se emiten por consola y se exportan a un archivo de texto |
-| SUP-11 | Un reclamo cerrado no puede reabrirse bajo ninguna condición |
+| SUP-01 | El administrador carga el presupuesto del mes antes de emitir las expensas. |
+| SUP-02 | Si un vecino cambia su teléfono o correo electrónico, avisa a la administración para que actualice sus datos. |
+| SUP-03 | Durante el uso del sistema no se dividen ni se unen lotes; se mantienen los 150 lotes del barrio. |
+| SUP-04 | Las franjas horarias de autorización de visitas comienzan y terminan en el mismo día; si se necesita otro horario al día siguiente, se registra otra franja. |
+| SUP-05 | Si varias personas avisan sobre la misma falla de un equipo que ya tiene una orden abierta, se agrega la información a esa orden en lugar de crear otra. |
+| SUP-06 | El administrador asigna los trabajos de mantenimiento considerando la especialidad del empleado; por ejemplo, una reparación eléctrica se asigna a un electricista. |

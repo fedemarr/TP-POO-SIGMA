@@ -17,7 +17,7 @@ Fuente editable: [casos-de-uso.puml](uml/casos-de-uso.puml).
 | CU-17 → CU-18 | include | RN-14 establece que toda falla genera una orden, con la prioridad según el tipo de equipo |
 | CU-22 → CU-23 | include | RN-17 impide habilitar un ingreso sin verificar la autorización |
 | CU-06 → CU-05 | extend | Reabrir es opcional y solo si el reclamo está resuelto y no pasaron 5 días (RN-03) |
-| CU-08 → CU-07 | extend | El escalado ocurre solo si hay un reclamo alto sin atender hace más de 24 horas (RN-06, SUP-06) |
+| CU-08 → CU-07 | extend | El escalado ocurre solo si hay un reclamo alto sin atender hace más de 24 horas (RN-06) |
 | CU-11 → CU-09 | extend | La notificación de morosidad se dispara solo si el lote supera los tres períodos impagos (RN-11) |
 | CU-14 → CU-12 | extend | El interés se aplica solo si el pago es posterior al vencimiento (RN-09) |
 
@@ -66,7 +66,7 @@ En include, la flecha va del caso base al incluido. En extend, va de la extensi�
 - Actor: Vecino
 - Precondición: El reclamo está en estado resuelto y no pasaron 5 días.
 - Flujo principal: 1) Selecciona el reclamo resuelto. 2) Indica el motivo. 3) El sistema lo devuelve a en curso y registra el cambio.
-- Alternativos: A1) Pasaron más de 5 días: el sistema lo cierra y rechaza la reapertura (RN-03, SUP-11).
+- Alternativos: A1) Pasaron más de 5 días: el sistema lo cierra y rechaza la reapertura (RN-03).
 
 ### CU-07 Consultar reclamos pendientes
 
@@ -79,7 +79,7 @@ En include, la flecha va del caso base al incluido. En extend, va de la extensi�
 
 - Actor: Administrador
 - Precondición: Existe un reclamo de prioridad alta sin atender hace más de 24 horas.
-- Flujo principal: 1) El sistema detecta la condición al consultar (SUP-06). 2) Genera el aviso de escalamiento. 3) Lo registra en el historial del reclamo.
+- Flujo principal: 1) El sistema detecta la condición al consultar. 2) Genera el aviso de escalamiento. 3) Lo registra en el historial del reclamo.
 
 ## Módulo Expensas y pagos
 
@@ -93,13 +93,13 @@ En include, la flecha va del caso base al incluido. En extend, va de la extensi�
 ### CU-10 Calcular expensa del lote (incluido)
 
 - Actor: ninguno (invocado por CU-09)
-- Flujo principal: 1) Obtiene el coeficiente de participación del lote (SUP-01). 2) Multiplica el presupuesto por el coeficiente (RN-08). 3) Devuelve el importe.
+- Flujo principal: 1) Obtiene el coeficiente de participación del lote. 2) Multiplica el presupuesto por el coeficiente (RN-08). 3) Devuelve el importe.
 
 ### CU-11 Notificar morosidad (extiende CU-09)
 
 - Actor: Administrador
 - Precondición: El lote supera los tres períodos impagos.
-- Flujo principal: 1) El sistema detecta la condición al emitir. 2) Marca el lote como moroso. 3) Registra la notificación formal al titular (SUP-09).
+- Flujo principal: 1) El sistema detecta la condición al emitir. 2) Marca el lote como moroso. 3) Registra la notificación formal al titular.
 
 ### CU-12 Registrar pago
 
@@ -117,7 +117,7 @@ En include, la flecha va del caso base al incluido. En extend, va de la extensi�
 
 - Actor: Administrador
 - Precondición: El pago se registra después del vencimiento de alguna expensa.
-- Flujo principal: 1) El sistema calcula los días de atraso. 2) Aplica el 3 % mensual proporcional sobre el saldo impago (RN-09, SUP-05). 3) Suma el interés a la deuda del período antes de imputar.
+- Flujo principal: 1) El sistema calcula los días de atraso. 2) Aplica el 3 % mensual proporcional sobre el saldo impago (RN-09). 3) Suma el interés a la deuda del período antes de imputar.
 
 ### CU-15 Registrar ajuste de pago
 
@@ -144,7 +144,7 @@ En include, la flecha va del caso base al incluido. En extend, va de la extensi�
 ### CU-18 Generar orden de mantenimiento (incluido, también invocable por el Administrador)
 
 - Actor: Administrador
-- Flujo principal: 1) El sistema determina la prioridad según el tipo de equipo (RN-14). 2) Si es luminaria y hay más de 3 falladas en el sector, eleva la prioridad a alta. 3) Crea la orden con fecha de apertura y descripción. 4) El administrador le asigna un empleado de mantenimiento (SUP-07).
+- Flujo principal: 1) El sistema determina la prioridad según el tipo de equipo (RN-14). 2) Si es luminaria y hay más de 3 falladas en el sector, eleva la prioridad a alta. 3) Crea la orden con fecha de apertura y descripción. 4) El administrador le asigna un empleado de mantenimiento según su especialidad (SUP-06).
 - Alternativos: A1) No hay empleados con la especialidad requerida: la orden queda sin asignar.
 
 ### CU-19 Cerrar orden de mantenimiento
@@ -157,7 +157,7 @@ En include, la flecha va del caso base al incluido. En extend, va de la extensi�
 ### CU-20 Consultar estado de equipos
 
 - Actor: Administrador
-- Flujo principal: 1) Solicita el listado, con filtro opcional por sector o estado. 2) El sistema muestra cada equipo con su estado y sus órdenes abiertas. 3) Marca las cámaras sin funcionar hace más de 48 horas (RN-15, SUP-06).
+- Flujo principal: 1) Solicita el listado, con filtro opcional por sector o estado. 2) El sistema muestra cada equipo con su estado y sus órdenes abiertas. 3) Marca las cámaras sin funcionar hace más de 48 horas (RN-15).
 
 ## Módulo Visitas
 
@@ -192,7 +192,7 @@ En include, la flecha va del caso base al incluido. En extend, va de la extensi�
 ### CU-25 Emitir reporte de morosidad
 
 - Actor: Administrador
-- Flujo principal: 1) Solicita el reporte. 2) El sistema lista los lotes con deuda, ordenados por importe adeudado, indicando períodos impagos, intereses y condición de moroso. 3) Lo exporta a archivo (SUP-10).
+- Flujo principal: 1) Solicita el reporte. 2) El sistema lista los lotes con deuda, ordenados por importe adeudado, indicando períodos impagos, intereses y condición de moroso. 3) Lo exporta a archivo.
 
 ### CU-26 Emitir reporte de equipos fuera de servicio
 

@@ -4,7 +4,7 @@
 
 ## Estado actual
 
-Inicio de la etapa 1. Incluye 4 actores, 21 requerimientos funcionales, 20 reglas de negocio, 11 supuestos, 27 casos de uso y un diagrama PlantUML editable con su vista SVG. El diagrama de clases, las secuencias y las justificaciones finales están pendientes. Todavía no hay aplicación Java ejecutable.
+Inicio de la etapa 1. Incluye 4 actores, 21 requerimientos funcionales, 20 reglas de negocio, 6 supuestos, 27 casos de uso y un diagrama PlantUML editable con su vista SVG. El diagrama de clases, las secuencias y las justificaciones finales están pendientes. Todavía no hay aplicación Java ejecutable.
 
 ## Documentación
 

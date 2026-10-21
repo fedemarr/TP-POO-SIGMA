@@ -8,7 +8,7 @@ Propuesta 1: gestión del barrio Los Aromos. Aplicación Java orientada a objeto
 
 - Persona se vincula a Lote mediante Residencia, que registra tipo (titular, familiar o inquilino) y vigencia. Un lote tiene un único titular vigente; una persona puede ser titular de varios lotes.
 - Equipo es abstracta y tiene las especializaciones Camara y Luminaria. La prioridad de falla usa polimorfismo y el contexto del sector para contar luminarias falladas.
-- Empleado es abstracta y tiene Guardia, EmpleadoMantenimiento y, según SUP-03, Administrador.
+- Empleado es abstracta y tiene Guardia, EmpleadoMantenimiento y, como propuesta de diseño, Administrador.
 - Reclamo contiene CambioEstado y Comentario como composición, para conservar su evolución.
 - Pago corresponde a un lote y genera imputaciones a distintas expensas, aplicando intereses y luego capital desde el período más antiguo. Los errores se corrigen mediante ajustes.
 - Autorizacion registra visitante, lote, otorgante, vigencia y franja horaria. RegistroIngreso contiene autorización, guardia, ingreso y egreso opcional.
@@ -39,11 +39,11 @@ Cada justificación debe documentar el problema, la decisión, las clases involu
 - El límite de cinco aplica a reclamos en curso, no al total histórico. El diagrama de clases debe expresar una relación 0..* y una restricción sobre los reclamos en curso. Antes de asignar responsable, la multiplicidad debe admitir 0..1.
 - La reapertura de resuelto a en curso es una excepción explícita a la progresión ordinaria de RN-02.
 - CU-03 actualmente limita la asignación a empleados con menos de cinco reclamos en curso. Revisar si la consigna exige limitar la asignación o únicamente la transición a en curso.
-- Precisar cómo se prorratea el 3 % mensual (base de días, redondeo, momento inicial y prevención de doble cálculo). SUP-05 todavía no resuelve todos estos detalles.
+- Precisar cómo se prorratea el 3 % mensual (base de días, redondeo, momento inicial y prevención de doble cálculo). Esta decisión técnica queda pendiente de definición.
 - Definir quién aplica saldo a favor, cómo revierte imputaciones un ajuste y cuándo se actualiza la morosidad.
 - Confirmar si CU-14 debe extender Registrar pago o formar parte del cálculo de deuda consultado también por CU-16 y CU-25.
 - Precisar qué significa «sin atender» para escalar un reclamo y cómo se evita generar avisos repetidos.
-- Revisar SUP-06: la evaluación al consultar debe aceptarse como interpretación de los cierres y avisos automáticos que pide el enunciado.
+- Definir cuándo se ejecutan los cierres y avisos automáticos exigidos por el enunciado; el mecanismo técnico queda pendiente y no forma parte de los supuestos cotidianos.
 - El PDF original fue mencionado en el chat, pero no se incorporó a esta importación. Las fechas, la rúbrica y los requisitos deben validarse contra ese archivo.
 
 ## Hitos informados en el chat
