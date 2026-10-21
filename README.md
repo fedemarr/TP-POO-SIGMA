@@ -4,13 +4,14 @@
 
 ## Estado actual
 
-Inicio de la etapa 1. Incluye 4 actores, 21 requerimientos funcionales, 20 reglas de negocio, 6 supuestos, 27 casos de uso y un diagrama PlantUML editable con su vista SVG. El diagrama de clases, las secuencias y las justificaciones finales están pendientes. Todavía no hay aplicación Java ejecutable.
+Inicio de la etapa 1. Incluye 4 actores, 21 requerimientos funcionales, 20 reglas de negocio, 6 supuestos, 27 casos de uso y un diagrama PlantUML editable con su vista SVG. Las justificaciones de 3 SOLID y 4 GRASP están redactadas; queda reflejarlas en el modelo final y las secuencias, e incorporar los diagramas al repositorio. Todavía no hay aplicación Java ejecutable.
 
 ## Documentación
 
 - [Análisis: actores, requerimientos, reglas y supuestos](docs/01-analisis.md)
 - [Casos de uso: diagrama y descripciones](docs/02-casos-de-uso.md)
 - [Plan, decisiones y pendientes](docs/03-plan-y-decisiones.md)
+- [Justificación de 3 SOLID y 4 GRASP](docs/04-solid-y-grasp.md)
 - [Fuente PlantUML](docs/uml/casos-de-uso.puml)
 
 ## Estructura

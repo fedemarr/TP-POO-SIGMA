@@ -13,7 +13,7 @@ Propuesta 1: gestión del barrio Los Aromos. Aplicación Java orientada a objeto
 - Pago corresponde a un lote y genera imputaciones a distintas expensas, aplicando intereses y luego capital desde el período más antiguo. Los errores se corrigen mediante ajustes.
 - Autorizacion registra visitante, lote, otorgante, vigencia y franja horaria. RegistroIngreso contiene autorización, guardia, ingreso y egreso opcional.
 
-## SOLID y GRASP por justificar en el informe
+## SOLID y GRASP seleccionados
 
 | Principio | Aplicación propuesta |
 | --- | --- |
@@ -25,7 +25,7 @@ Propuesta 1: gestión del barrio Los Aromos. Aplicación Java orientada a objeto
 | Controlador | GestorDeReclamos y GestorDeAccesos reciben las operaciones de la consola. |
 | Polimorfismo | Camara y Luminaria resuelven la prioridad de falla de acuerdo con su tipo. |
 
-Cada justificación debe documentar el problema, la decisión, las clases involucradas y la ventaja. Estas propuestas todavía no constituyen la justificación final.
+Las [justificaciones completas de 3 SOLID y 4 GRASP](04-solid-y-grasp.md) documentan el problema, la decisión, las clases involucradas y la ventaja. Queda reflejar estas decisiones en el diagrama de clases final y actualizar las secuencias.
 
 ## Secuencias previstas
 
@@ -60,7 +60,7 @@ Cada justificación debe documentar el problema, la decisión, las clases involu
 - [ ] Registrar integrantes y docente colaborador.
 - [ ] Dibujar el diagrama de clases inicial con atributos, visibilidades, métodos y multiplicidades.
 - [ ] Dibujar las dos secuencias y verificar su correspondencia con los métodos.
-- [ ] Redactar las justificaciones SOLID y GRASP.
+- [x] Redactar las justificaciones SOLID y GRASP.
 - [ ] Preparar el diagrama de clases final y explicar los cambios.
 - [ ] Revisar y exportar el informe de entrega.
 
