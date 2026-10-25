@@ -1,0 +1,63 @@
+@startuml 09-gestores-operacion
+title SIGMA - Modelo final   gestores operacion
+scale max 3800*3800
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class GestorReclamos {
+    + registrarReclamo(lote: Lote, solicitante: Persona, tipo: TipoReclamo, descripcion: String, fecha: LocalDateTime): Reclamo
+    + asignarReclamo(reclamo: Reclamo, empleado: Empleado, fecha: LocalDateTime): void
+    + cambiarEstado(reclamo: Reclamo, empleado: Empleado, nuevo: EstadoReclamo, observacion: String, fecha: LocalDateTime): void
+    + reabrir(reclamo: Reclamo, vecino: Persona, motivo: String, fecha: LocalDateTime): void
+    + agregarComentario(reclamo: Reclamo, autor: String, texto: String, fecha: LocalDateTime): void
+    + consultarSeguimiento(reclamo: Reclamo, vecino: Persona): Reclamo
+    + consultarPendientes(ahora: LocalDateTime): List<Reclamo>
+    + verificarPlazos(ahora: LocalDateTime): void
+  }
+
+class GestorMantenimiento {
+    + registrarFalla(equipo: Equipo, autor: String, descripcion: String, fecha: LocalDateTime): FallaEquipo
+    + generarOrden(administrador: Administrador, falla: FallaEquipo, tecnico: EmpleadoMantenimiento, fecha: LocalDateTime): OrdenMantenimiento
+    + cerrarOrden(orden: OrdenMantenimiento, tecnico: EmpleadoMantenimiento, descripcion: String, fecha: LocalDateTime): void
+    + consultarEquipos(ahora: LocalDateTime): List<Equipo>
+    + verificarPlazos(ahora: LocalDateTime): void
+  }
+
+class GestorReportes {
+    + reclamosPendientes(ahora: LocalDateTime): String
+    + morosidad(fecha: LocalDate): String
+    + equiposFueraDeServicio(ahora: LocalDateTime): String
+    + exportar(texto: String, ruta: String): void
+  }
+
+class PlanificadorPlazos {
+    + ejecutar(ahora: LocalDateTime): void
+  }
+
+interface RepositorioReclamos {
+    + listar(): List<Reclamo>
+    + contarEnCurso(empleado: Empleado): int
+    + guardar(reclamo: Reclamo): void
+  }
+
+interface RepositorioEquipos {
+    + listar(): List<Equipo>
+    + guardar(equipo: Equipo): void
+    + guardarOrden(orden: OrdenMantenimiento): void
+  }
+
+interface RepositorioNotificaciones {
+    + guardarSiNoExiste(notificacion: Notificacion): boolean
+  }
+GestorReclamos --> RepositorioReclamos
+GestorMantenimiento --> RepositorioEquipos
+GestorReportes --> RepositorioReclamos
+GestorReportes --> RepositorioEquipos
+PlanificadorPlazos --> GestorReclamos
+PlanificadorPlazos --> GestorMantenimiento
+GestorReclamos --> RepositorioNotificaciones
+GestorMantenimiento --> RepositorioNotificaciones
+@enduml

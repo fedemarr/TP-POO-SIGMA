@@ -1,0 +1,92 @@
+@startuml secuencia-pago-final
+title SIGMA - CU-12 Registro de pago (modelo final)
+scale max 3800*3800
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+autonumber
+actor Administrador as Actor
+participant "gestor: GestorExpensas" as Gestor
+participant "expensas: RepositorioExpensas" as RE
+participant "pagos: RepositorioPagos" as RP
+participant "expensa: Expensa" as E
+participant "mora: CalculadoraMora" as Mora
+participant "lote: Lote" as Lote
+
+Actor -> Gestor: registrarPago(lote, importe, medio, fecha)
+activate Gestor
+alt Importe no positivo o medio de pago invalido
+  Gestor --> Actor: PagoInvalidoException
+else Datos validos
+  Gestor -> RE: buscarPorLote(lote)
+  RE --> Gestor: expensas: List<Expensa>
+  note over Gestor,RE
+    El gestor trabaja con copias de los datos leidos.
+    Ordena los periodos del mas antiguo al mas nuevo.
+  end note
+  loop Cada expensa del lote
+    Gestor -> E: calcularSaldo(fecha, mora)
+    E -> E: capitalPendiente()
+    E --> E: capital: BigDecimal
+    E -> E: interesPendiente(fecha, mora)
+    opt Hay periodos de atraso con capital impago
+      E -> Mora: calcular(expensa, fecha)
+      Mora --> E: interesDevengado: BigDecimal
+    end
+    E --> E: interesPendiente: BigDecimal
+    E --> Gestor: saldo: BigDecimal
+  end
+  alt La suma de saldos es cero
+    Gestor --> Actor: PagoInvalidoException: lote sin deuda
+  else Existe deuda
+    Gestor -> RP: siguienteNumero()
+    RP --> Gestor: numero: int
+    create participant "pago: Pago" as P
+    Gestor -> P: Pago(numero, lote, fecha, importe, medio)
+    Gestor -> P: imputar(expensas, fecha, mora)
+    activate P
+    loop Expensas adeudadas, por antiguedad y mientras quede importe
+      P -> P: saldoSinImputar()
+      P --> P: disponible: BigDecimal
+      P -> E: interesPendiente(fecha, mora)
+      E -> Mora: calcular(expensa, fecha)
+      Mora --> E: interesDevengado: BigDecimal
+      E --> P: interesPendiente: BigDecimal
+      P -> E: capitalPendiente()
+      E --> P: capitalPendiente: BigDecimal
+      note right of P
+        Toma del disponible lo necesario para intereses.
+        El resto se aplica al capital de esta expensa.
+        No avanza al siguiente periodo hasta agotarla
+        o quedarse sin importe.
+      end note
+      create participant "imputacion: Imputacion" as I
+      P -> I: Imputacion(expensa, fecha, interes, capital)
+      P -> E: aplicarImputacion(imputacion)
+      E --> P: void
+    end
+    P --> Gestor: void
+    deactivate P
+    Gestor -> P: saldoSinImputar()
+    P --> Gestor: saldoAFavor: BigDecimal
+    Gestor -> Lote: actualizarMorosidad(expensas, fecha)
+    Lote --> Gestor: moroso: boolean
+    Gestor -> RP: confirmarPago(pago, expensas, lote)
+    alt Fallo al confirmar los archivos
+      RP --> Gestor: IOException
+      Gestor --> Actor: error: pago no confirmado; se descartan las copias
+    else Confirmacion completa
+      RP --> Gestor: void
+      Gestor --> Actor: pago: Pago
+    end
+  end
+end
+deactivate Gestor
+legend bottom
+  calcular() es una consulta: repetirla no acumula intereses.
+  interesPendiente descuenta los intereses ya imputados.
+  confirmarPago conserva pago, imputaciones, expensas y lote de forma conjunta.
+  El saldo a favor queda en el pago como importe sin imputar.
+  Los errores se corrigen con AjustePago; nunca se borra el pago original.
+endlegend
+@enduml

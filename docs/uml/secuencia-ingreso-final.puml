@@ -1,0 +1,55 @@
+@startuml secuencia-ingreso-final
+title SIGMA - CU-22 Ingreso de visita (modelo final)
+scale max 3800*3800
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+autonumber
+actor "Guardia de porteria" as Actor
+participant "gestor: GestorAccesos" as Gestor
+participant "guardia: Guardia" as Guardia
+participant "autorizaciones: RepositorioAutorizaciones" as Autorizaciones
+participant "autorizacion: Autorizacion" as Autorizacion
+participant "ingresos: RepositorioIngresos" as Ingresos
+
+Actor -> Gestor: registrarIngreso(documento, lote, guardia, fecha)
+activate Gestor
+Gestor -> Guardia: estaEnPorteria()
+Guardia --> Gestor: enPorteria: boolean
+alt El guardia no esta en porteria
+  Gestor --> Actor: ReglaNegocioException
+else El guardia esta en porteria
+  Gestor -> Autorizaciones: buscar(documento, lote)
+  Autorizaciones --> Gestor: candidatas: List<Autorizacion>
+  loop Cada candidata, hasta encontrar una vigente
+    Gestor -> Autorizacion: estaVigente(fecha)
+    Autorizacion --> Gestor: vigente: boolean
+  end
+  alt No se encontro autorizacion vigente
+    Gestor --> Actor: AutorizacionInvalidaException
+  else Se encontro autorizacion vigente
+    Gestor -> Ingresos: buscarAbierto(documento)
+    Ingresos --> Gestor: previo: RegistroIngreso o null
+    alt Existe un ingreso sin egreso, incluso para otro lote
+      Gestor --> Actor: IngresoDuplicadoException
+    else No existe ingreso abierto
+      create participant "nuevo: RegistroIngreso" as Nuevo
+      Gestor -> Nuevo: RegistroIngreso(autorizacion, guardia, fecha)
+      Gestor -> Ingresos: guardar(nuevo)
+      alt Fallo al escribir el archivo
+        Ingresos --> Gestor: IOException
+        Gestor --> Actor: error de persistencia; ingreso no confirmado
+      else Guardado correcto
+        Ingresos --> Gestor: void
+        Gestor --> Actor: nuevo: RegistroIngreso
+      end
+    end
+  end
+end
+deactivate Gestor
+legend bottom
+  La operacion solo habilita el ingreso al confirmar el guardado.
+  Los repositorios son interfaces; sus implementaciones escriben archivos.
+  La autorizacion verifica fechas y franja horaria, incluidas las recurrencias.
+endlegend
+@enduml

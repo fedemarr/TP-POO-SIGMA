@@ -1,0 +1,49 @@
+@startuml 07-gestor-expensas
+title SIGMA - Modelo final   gestor expensas
+scale max 3800*3800
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class GestorExpensas {
+    - expensas: RepositorioExpensas
+    - pagos: RepositorioPagos
+    - mora: CalculadoraMora
+    + GestorExpensas(expensas: RepositorioExpensas, pagos: RepositorioPagos, mora: CalculadoraMora)
+    + emitirExpensas(barrio: Barrio, periodo: YearMonth, presupuesto: BigDecimal): void
+    + registrarPago(lote: Lote, importe: BigDecimal, medio: MedioPago, fecha: LocalDate): Pago
+    + registrarAjuste(pago: Pago, importe: BigDecimal, motivo: String, fecha: LocalDate): AjustePago
+    + consultarCuenta(lote: Lote, fecha: LocalDate): BigDecimal
+    + aplicarSaldosAFavor(lote: Lote, fecha: LocalDate): void
+    + verificarMorosidad(fecha: LocalDate): void
+  }
+
+interface RepositorioExpensas {
+    + buscarPorLote(lote: Lote): List<Expensa>
+    + existePeriodo(periodo: YearMonth): boolean
+    + guardar(expensa: Expensa): void
+  }
+
+interface RepositorioPagos {
+    + siguienteNumero(): int
+    + guardar(pago: Pago): void
+    + confirmarPago(pago: Pago, expensas: List<Expensa>, lote: Lote): void
+    + buscarPorLote(lote: Lote): List<Pago>
+    + confirmarAjuste(pago: Pago, ajuste: AjustePago, expensas: List<Expensa>, lote: Lote): void
+  }
+
+class CalculadoraMora {
+    - tasaMensual: BigDecimal
+    + calcular(expensa: Expensa, fecha: LocalDate): BigDecimal
+  }
+
+interface RepositorioNotificaciones {
+    + guardarSiNoExiste(notificacion: Notificacion): boolean
+  }
+GestorExpensas --> RepositorioExpensas
+GestorExpensas --> RepositorioPagos
+GestorExpensas --> CalculadoraMora
+GestorExpensas --> RepositorioNotificaciones
+@enduml

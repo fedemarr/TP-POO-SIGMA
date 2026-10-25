@@ -1,0 +1,70 @@
+@startuml inicial-03-expensas
+title SIGMA - Modelo inicial   expensas
+scale max 3800*3800
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class Expensa {
+    - periodo: YearMonth
+    - importe: BigDecimal
+    - vencimiento: LocalDate
+    - estado: EstadoExpensa
+    + calcularInteres(fecha: LocalDate): BigDecimal
+    + calcularSaldo(fecha: LocalDate): BigDecimal
+    + aplicarImputacion(imputacion: Imputacion): void
+  }
+
+class Pago {
+    - numero: int
+    - fecha: LocalDate
+    - importe: BigDecimal
+    - medio: MedioPago
+    + saldoSinImputar(): BigDecimal
+    + imputar(expensas: List<Expensa>): void
+    + registrarAjuste(importe: BigDecimal, motivo: String, fecha: LocalDate): AjustePago
+  }
+
+class Imputacion {
+    - fecha: LocalDate
+    - importeInteres: BigDecimal
+    - importeCapital: BigDecimal
+    + calcularTotal(): BigDecimal
+  }
+
+class AjustePago {
+    - fecha: LocalDate
+    - importe: BigDecimal
+    - motivo: String
+  }
+
+enum MedioPago {
+    EFECTIVO
+    TRANSFERENCIA
+    TARJETA
+  }
+
+enum EstadoExpensa {
+    IMPAGA
+    PARCIAL
+    PAGADA
+  }
+
+class Lote {
+    - numero: int
+    - superficie: double
+    - moroso: boolean
+    + Lote(numero: int, superficie: double)
+    + calcularCoeficiente(superficieTotal: double): double
+    + estaAutorizada(persona: Persona, fecha: LocalDate): boolean
+    + calcularDeuda(fecha: LocalDate): BigDecimal
+    + actualizarMorosidad(fecha: LocalDate): void
+  }
+Lote "1" *-- "0..*" Expensa
+Lote "1" -- "0..*" Pago
+Pago "1" *-- "0..*" Imputacion
+Expensa "1" -- "0..*" Imputacion
+Pago "1" *-- "0..*" AjustePago
+@enduml

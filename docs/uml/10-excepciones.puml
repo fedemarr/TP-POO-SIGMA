@@ -1,0 +1,26 @@
+@startuml 10-excepciones
+title SIGMA - Modelo final   excepciones
+scale max 3800*3800
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class ReglaNegocioException <<exception>>
+
+class AutorizacionInvalidaException <<exception>>
+
+class IngresoDuplicadoException <<exception>>
+
+class PagoInvalidoException <<exception>>
+
+class LimiteReclamosException <<exception>>
+
+class TransicionInvalidaException <<exception>>
+ReglaNegocioException <|-- AutorizacionInvalidaException
+ReglaNegocioException <|-- IngresoDuplicadoException
+ReglaNegocioException <|-- PagoInvalidoException
+ReglaNegocioException <|-- LimiteReclamosException
+ReglaNegocioException <|-- TransicionInvalidaException
+@enduml

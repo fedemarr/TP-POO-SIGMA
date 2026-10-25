@@ -1,0 +1,94 @@
+@startuml inicial-02-reclamos
+title SIGMA - Modelo inicial   reclamos
+scale max 3800*3800
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class Reclamo {
+    - numero: int
+    - fecha: LocalDateTime
+    - tipo: TipoReclamo
+    - descripcion: String
+    - prioridad: PrioridadReclamo
+    - estado: EstadoReclamo
+    + asignar(responsable: Empleado, fecha: LocalDateTime): void
+    + cambiarEstado(nuevo: EstadoReclamo, observacion: String, fecha: LocalDateTime): void
+    + reabrir(motivo: String, fecha: LocalDateTime): void
+    + agregarComentario(autor: String, texto: String, fecha: LocalDateTime): void
+    + requiereEscalamiento(ahora: LocalDateTime): boolean
+    + cerrarPorPlazo(ahora: LocalDateTime): void
+    + compareTo(otro: Reclamo): int
+  }
+
+class CambioEstado {
+    - fecha: LocalDateTime
+    - estadoNuevo: EstadoReclamo
+    - observacion: String
+  }
+
+class Comentario {
+    - autor: String
+    - fecha: LocalDateTime
+    - texto: String
+  }
+
+enum TipoReclamo {
+    SEGURIDAD
+    MANTENIMIENTO
+    CONVIVENCIA
+    ADMINISTRATIVO
+  }
+
+enum PrioridadReclamo {
+    ALTA
+    MEDIA
+    BAJA
+  }
+
+enum EstadoReclamo {
+    ABIERTO
+    ASIGNADO
+    EN_CURSO
+    RESUELTO
+    CERRADO
+  }
+
+abstract class Empleado {
+    - legajo: String
+    - nombre: String
+    - fechaIngreso: LocalDate
+    # Empleado(legajo: String, nombre: String, ingreso: LocalDate)
+    + getLegajo(): String
+    + {abstract} describirRol(): String
+  }
+
+class Persona {
+    - nombre: String
+    - apellido: String
+    - documento: String
+    - telefono: String
+    - correoElectronico: String
+    + Persona(nombre: String, apellido: String, documento: String, telefono: String, correo: String)
+    + getDocumento(): String
+    + actualizarContacto(telefono: String, correo: String): void
+  }
+
+class Lote {
+    - numero: int
+    - superficie: double
+    - moroso: boolean
+    + Lote(numero: int, superficie: double)
+    + calcularCoeficiente(superficieTotal: double): double
+    + estaAutorizada(persona: Persona, fecha: LocalDate): boolean
+    + calcularDeuda(fecha: LocalDate): BigDecimal
+    + actualizarMorosidad(fecha: LocalDate): void
+  }
+Lote "1" -- "0..*" Reclamo
+Persona "1" -- "0..*" Reclamo : solicitante
+Empleado "0..1" -- "0..*" Reclamo : responsable
+Reclamo "1" *-- "1..*" CambioEstado
+Reclamo "1" *-- "0..*" Comentario
+@enduml
