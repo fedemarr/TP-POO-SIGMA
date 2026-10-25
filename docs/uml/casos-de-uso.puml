@@ -66,6 +66,7 @@ VEC --> CU17
 VEC --> CU21
 
 ADM --> CU03
+ADM --> CU27
 ADM --> CU04
 ADM --> CU07
 ADM --> CU09
@@ -77,6 +78,8 @@ ADM --> CU25
 ADM --> CU26
 
 GUA --> CU17
+GUA --> CU27
+GUA --> CU04
 GUA --> CU22
 GUA --> CU24
 
@@ -87,7 +90,6 @@ EMP --> CU27
 CU01 ..> CU02 : <<include>>
 CU09 ..> CU10 : <<include>>
 CU12 ..> CU13 : <<include>>
-CU17 ..> CU18 : <<include>>
 CU22 ..> CU23 : <<include>>
 
 CU06 ..> CU05 : <<extend>>

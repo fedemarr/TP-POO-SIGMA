@@ -1,0 +1,338 @@
+@startuml clases-inicial
+scale max 3800*3800
+title SIGMA - Diagrama de clases inicial (Etapa 1)
+top to bottom direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+hide empty members
+
+package "Barrio y vecinos" {
+  class Barrio {
+    - nombre: String
+    - lotes: List<Lote>
+    - personal: List<Empleado>
+    - equipos: List<Equipo>
+    - reclamos: List<Reclamo>
+    + calcularSuperficieTotal(): double
+    + registrarReclamo(lote: Lote, solicitante: Persona, tipo: TipoReclamo, descripcion: String, fecha: LocalDateTime): Reclamo
+    + asignarReclamo(reclamo: Reclamo, empleado: Empleado): void
+    + iniciarReclamo(reclamo: Reclamo, empleado: Empleado, fecha: LocalDateTime): void
+    + emitirExpensas(periodo: YearMonth, presupuesto: BigDecimal): void
+    + registrarPago(lote: Lote, importe: BigDecimal, medio: MedioPago, fecha: LocalDate): Pago
+    + registrarFalla(equipo: Equipo, descripcion: String, fecha: LocalDateTime): FallaEquipo
+    + generarOrden(falla: FallaEquipo, tecnico: EmpleadoMantenimiento, fecha: LocalDateTime): OrdenMantenimiento
+    + registrarIngreso(documento: String, lote: Lote, guardia: Guardia, fecha: LocalDateTime): RegistroIngreso
+    + registrarEgreso(registro: RegistroIngreso, fecha: LocalDateTime): void
+    + evaluarPlazos(ahora: LocalDateTime): void
+    + emitirReporte(tipo: TipoReporte, fecha: LocalDate): String
+    + guardar(ruta: String): void
+    + cargar(ruta: String): void
+  }
+  class Persona {
+    - nombre: String
+    - apellido: String
+    - documento: String
+    - telefono: String
+    - correoElectronico: String
+    + Persona(nombre: String, apellido: String, documento: String, telefono: String, correo: String)
+    + getDocumento(): String
+    + actualizarContacto(telefono: String, correo: String): void
+  }
+  class Lote {
+    - numero: int
+    - superficie: double
+    - moroso: boolean
+    + Lote(numero: int, superficie: double)
+    + calcularCoeficiente(superficieTotal: double): double
+    + estaAutorizada(persona: Persona, fecha: LocalDate): boolean
+    + calcularDeuda(fecha: LocalDate): BigDecimal
+    + actualizarMorosidad(fecha: LocalDate): void
+  }
+  class Residencia {
+    - tipo: TipoResidente
+    - desde: LocalDate
+    - hasta: LocalDate
+    - autorizadaPorTitular: boolean
+    + estaVigente(fecha: LocalDate): boolean
+    + autorizar(): void
+    + finalizar(fecha: LocalDate): void
+  }
+  enum TipoResidente {
+    TITULAR
+    FAMILIAR
+    INQUILINO
+  }
+}
+
+package "Personal" {
+  abstract class Empleado {
+    - legajo: String
+    - nombre: String
+    - fechaIngreso: LocalDate
+    # Empleado(legajo: String, nombre: String, ingreso: LocalDate)
+    + getLegajo(): String
+    + {abstract} describirRol(): String
+  }
+  class Administrador {
+    + describirRol(): String
+  }
+  class Guardia {
+    - turno: String
+    - puesto: PuestoGuardia
+    + describirRol(): String
+    + estaEnPorteria(): boolean
+  }
+  class EmpleadoMantenimiento {
+    - especialidad: Especialidad
+    + describirRol(): String
+    + getEspecialidad(): Especialidad
+  }
+  enum PuestoGuardia {
+    PORTERIA
+    RONDA
+    MONITOREO
+  }
+  enum Especialidad {
+    ELECTRICIDAD
+    PLOMERIA
+    JARDINERIA
+  }
+}
+
+package "Reclamos" {
+  class Reclamo {
+    - numero: int
+    - fecha: LocalDateTime
+    - tipo: TipoReclamo
+    - descripcion: String
+    - prioridad: PrioridadReclamo
+    - estado: EstadoReclamo
+    + asignar(responsable: Empleado, fecha: LocalDateTime): void
+    + cambiarEstado(nuevo: EstadoReclamo, observacion: String, fecha: LocalDateTime): void
+    + reabrir(motivo: String, fecha: LocalDateTime): void
+    + agregarComentario(autor: String, texto: String, fecha: LocalDateTime): void
+    + requiereEscalamiento(ahora: LocalDateTime): boolean
+    + cerrarPorPlazo(ahora: LocalDateTime): void
+    + compareTo(otro: Reclamo): int
+  }
+  class CambioEstado {
+    - fecha: LocalDateTime
+    - estadoNuevo: EstadoReclamo
+    - observacion: String
+  }
+  class Comentario {
+    - autor: String
+    - fecha: LocalDateTime
+    - texto: String
+  }
+  enum TipoReclamo {
+    SEGURIDAD
+    MANTENIMIENTO
+    CONVIVENCIA
+    ADMINISTRATIVO
+  }
+  enum PrioridadReclamo {
+    ALTA
+    MEDIA
+    BAJA
+  }
+  enum EstadoReclamo {
+    ABIERTO
+    ASIGNADO
+    EN_CURSO
+    RESUELTO
+    CERRADO
+  }
+}
+
+package "Expensas y pagos" {
+  class Expensa {
+    - periodo: YearMonth
+    - importe: BigDecimal
+    - vencimiento: LocalDate
+    - estado: EstadoExpensa
+    + calcularInteres(fecha: LocalDate): BigDecimal
+    + calcularSaldo(fecha: LocalDate): BigDecimal
+    + aplicarImputacion(imputacion: Imputacion): void
+  }
+  class Pago {
+    - numero: int
+    - fecha: LocalDate
+    - importe: BigDecimal
+    - medio: MedioPago
+    + saldoSinImputar(): BigDecimal
+    + imputar(expensas: List<Expensa>): void
+    + registrarAjuste(importe: BigDecimal, motivo: String, fecha: LocalDate): AjustePago
+  }
+  class Imputacion {
+    - fecha: LocalDate
+    - importeInteres: BigDecimal
+    - importeCapital: BigDecimal
+    + calcularTotal(): BigDecimal
+  }
+  class AjustePago {
+    - fecha: LocalDate
+    - importe: BigDecimal
+    - motivo: String
+  }
+  enum MedioPago {
+    EFECTIVO
+    TRANSFERENCIA
+    TARJETA
+  }
+  enum EstadoExpensa {
+    IMPAGA
+    PARCIAL
+    PAGADA
+  }
+}
+
+package "Equipos y mantenimiento" {
+  abstract class Equipo {
+    - codigo: String
+    - fechaInstalacion: LocalDate
+    - estado: EstadoEquipo
+    # Equipo(codigo: String, sector: Sector, instalacion: LocalDate)
+    + registrarFalla(descripcion: String, fecha: LocalDateTime): FallaEquipo
+    + cambiarEstado(nuevo: EstadoEquipo): void
+    + {abstract} prioridadDeFalla(falladasEnSector: int): PrioridadOrden
+  }
+  class Camara {
+    - resolucion: String
+    - diasGrabacion: int
+    + prioridadDeFalla(falladasEnSector: int): PrioridadOrden
+    + requiereAviso(ahora: LocalDateTime): boolean
+  }
+  class Luminaria {
+    - tipoLampara: String
+    - potencia: double
+    + prioridadDeFalla(falladasEnSector: int): PrioridadOrden
+  }
+  class Sector {
+    - nombre: String
+    + contarLuminariasFalladas(): int
+  }
+  class FallaEquipo {
+    - fecha: LocalDateTime
+    - descripcion: String
+    - registradaPor: String
+  }
+  class OrdenMantenimiento {
+    - numero: int
+    - apertura: LocalDateTime
+    - prioridad: PrioridadOrden
+    - descripcionTrabajo: String
+    - cierre: LocalDateTime
+    - descripcionReparacion: String
+    + iniciarReparacion(): void
+    + cerrar(fecha: LocalDateTime, tecnico: EmpleadoMantenimiento, descripcion: String): void
+    + elevarPrioridad(): void
+  }
+  enum EstadoEquipo {
+    OPERATIVO
+    CON_FALLA
+    EN_REPARACION
+    FUERA_DE_SERVICIO
+  }
+  enum PrioridadOrden {
+    ALTA
+    NORMAL
+  }
+}
+
+package "Visitas y avisos" {
+  class Visitante {
+    - nombre: String
+    - documento: String
+  }
+  class Autorizacion {
+    - desde: LocalDate
+    - hasta: LocalDate
+    - horaDesde: LocalTime
+    - horaHasta: LocalTime
+    - recurrente: boolean
+    + estaVigente(fecha: LocalDateTime): boolean
+  }
+  class RegistroIngreso {
+    - ingreso: LocalDateTime
+    - egreso: LocalDateTime
+    + estaAbierto(): boolean
+    + registrarEgreso(fecha: LocalDateTime): void
+  }
+  class Notificacion {
+    - fecha: LocalDateTime
+    - motivo: String
+    - destinatario: String
+    - referencia: String
+    - leida: boolean
+  }
+  enum TipoReporte {
+    RECLAMOS_PENDIENTES
+    MOROSIDAD
+    EQUIPOS_FUERA_DE_SERVICIO
+  }
+}
+
+Barrio "1" *-- "150" Lote
+Barrio "1" o-- "1..*" Empleado : coordina
+Barrio "1" *-- "1..*" Sector
+Lote "1" *-- "1..*" Residencia
+Persona "1" -- "0..*" Residencia
+Empleado <|-- Administrador
+Empleado <|-- Guardia
+Empleado <|-- EmpleadoMantenimiento
+Lote "1" -- "0..*" Reclamo
+Persona "1" -- "0..*" Reclamo : solicitante
+Empleado "0..1" -- "0..*" Reclamo : responsable
+Reclamo "1" *-- "1..*" CambioEstado
+Reclamo "1" *-- "0..*" Comentario
+Lote "1" *-- "0..*" Expensa
+Lote "1" -- "0..*" Pago
+Pago "1" *-- "0..*" Imputacion
+Expensa "1" -- "0..*" Imputacion
+Pago "1" *-- "0..*" AjustePago
+Equipo <|-- Camara
+Equipo <|-- Luminaria
+Sector "1" -- "0..*" Equipo
+Equipo "1" *-- "0..*" FallaEquipo
+Equipo "1" -- "0..*" OrdenMantenimiento
+FallaEquipo "1" -- "0..1" OrdenMantenimiento
+EmpleadoMantenimiento "1" -- "0..*" OrdenMantenimiento : tecnico
+Persona "1" -- "0..*" Autorizacion : otorgante
+Lote "1" -- "0..*" Autorizacion
+Visitante "1" -- "0..*" Autorizacion
+Autorizacion "1" -- "0..*" RegistroIngreso
+Guardia "1" -- "0..*" RegistroIngreso : habilita
+Barrio "1" *-- "0..*" Notificacion
+
+note right of Residencia
+  Un unico TITULAR vigente por lote.
+  FAMILIAR e INQUILINO requieren autorizacion
+  explicita del titular para presentar reclamos.
+  hasta puede ser null si sigue vigente.
+end note
+note right of Reclamo
+  Responsable opcional solo en ABIERTO.
+  Maximo 5 EN_CURSO por empleado.
+  Reapertura: RESUELTO -> EN_CURSO
+  dentro de los 5 dias, respetando el limite.
+  Comparable: prioridad y luego fecha.
+end note
+note right of Equipo
+  Camara: prioridad ALTA.
+  Luminaria: NORMAL; ALTA con mas de 3
+  luminarias falladas en el mismo sector.
+end note
+note right of Barrio
+  Modelo inicial: coordina operaciones y archivos.
+  Sera refinado con gestores y repositorios
+  al aplicar SOLID y GRASP en el modelo final.
+  El administrador inicia generarOrden().
+end note
+note bottom of RegistroIngreso
+  egreso null indica visita dentro del barrio.
+  No se permite otro ingreso abierto
+  del mismo documento, aun para otro lote.
+end note
+@enduml

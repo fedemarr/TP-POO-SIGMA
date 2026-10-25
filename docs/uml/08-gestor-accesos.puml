@@ -1,0 +1,30 @@
+@startuml 08-gestor-accesos
+title SIGMA - Modelo final   gestor accesos
+scale max 3800*3800
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class GestorAccesos {
+    - autorizaciones: RepositorioAutorizaciones
+    - ingresos: RepositorioIngresos
+    + GestorAccesos(autorizaciones: RepositorioAutorizaciones, ingresos: RepositorioIngresos)
+    + autorizarVisita(otorgante: Persona, lote: Lote, visitante: Visitante, desde: LocalDate, hasta: LocalDate, horaDesde: LocalTime, horaHasta: LocalTime, recurrente: boolean): Autorizacion
+    + registrarIngreso(documento: String, lote: Lote, guardia: Guardia, fecha: LocalDateTime): RegistroIngreso
+    + registrarEgreso(documento: String, fecha: LocalDateTime): void
+  }
+
+interface RepositorioAutorizaciones {
+    + buscar(documento: String, lote: Lote): List<Autorizacion>
+    + guardar(autorizacion: Autorizacion): void
+  }
+
+interface RepositorioIngresos {
+    + buscarAbierto(documento: String): RegistroIngreso
+    + guardar(registro: RegistroIngreso): void
+  }
+GestorAccesos --> RepositorioAutorizaciones
+GestorAccesos --> RepositorioIngresos
+@enduml

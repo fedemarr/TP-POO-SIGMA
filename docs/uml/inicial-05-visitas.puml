@@ -1,0 +1,72 @@
+@startuml inicial-05-visitas
+title SIGMA - Modelo inicial   visitas
+scale max 3800*3800
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class Visitante {
+    - nombre: String
+    - documento: String
+  }
+
+class Autorizacion {
+    - desde: LocalDate
+    - hasta: LocalDate
+    - horaDesde: LocalTime
+    - horaHasta: LocalTime
+    - recurrente: boolean
+    + estaVigente(fecha: LocalDateTime): boolean
+  }
+
+class RegistroIngreso {
+    - ingreso: LocalDateTime
+    - egreso: LocalDateTime
+    + estaAbierto(): boolean
+    + registrarEgreso(fecha: LocalDateTime): void
+  }
+
+class Persona {
+    - nombre: String
+    - apellido: String
+    - documento: String
+    - telefono: String
+    - correoElectronico: String
+    + Persona(nombre: String, apellido: String, documento: String, telefono: String, correo: String)
+    + getDocumento(): String
+    + actualizarContacto(telefono: String, correo: String): void
+  }
+
+class Lote {
+    - numero: int
+    - superficie: double
+    - moroso: boolean
+    + Lote(numero: int, superficie: double)
+    + calcularCoeficiente(superficieTotal: double): double
+    + estaAutorizada(persona: Persona, fecha: LocalDate): boolean
+    + calcularDeuda(fecha: LocalDate): BigDecimal
+    + actualizarMorosidad(fecha: LocalDate): void
+  }
+
+class Guardia {
+    - turno: String
+    - puesto: PuestoGuardia
+    + describirRol(): String
+    + estaEnPorteria(): boolean
+  }
+
+class Notificacion {
+    - fecha: LocalDateTime
+    - motivo: String
+    - destinatario: String
+    - referencia: String
+    - leida: boolean
+  }
+Persona "1" -- "0..*" Autorizacion : otorgante
+Lote "1" -- "0..*" Autorizacion
+Visitante "1" -- "0..*" Autorizacion
+Autorizacion "1" -- "0..*" RegistroIngreso
+Guardia "1" -- "0..*" RegistroIngreso : habilita
+@enduml

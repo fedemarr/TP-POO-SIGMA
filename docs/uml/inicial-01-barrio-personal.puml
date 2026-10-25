@@ -1,0 +1,119 @@
+@startuml inicial-01-barrio-personal
+title SIGMA - Modelo inicial   barrio personal
+scale max 3800*3800
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class Barrio {
+    - nombre: String
+    - lotes: List<Lote>
+    - personal: List<Empleado>
+    - equipos: List<Equipo>
+    - reclamos: List<Reclamo>
+    + calcularSuperficieTotal(): double
+    + registrarReclamo(lote: Lote, solicitante: Persona, tipo: TipoReclamo, descripcion: String, fecha: LocalDateTime): Reclamo
+    + asignarReclamo(reclamo: Reclamo, empleado: Empleado): void
+    + iniciarReclamo(reclamo: Reclamo, empleado: Empleado, fecha: LocalDateTime): void
+    + emitirExpensas(periodo: YearMonth, presupuesto: BigDecimal): void
+    + registrarPago(lote: Lote, importe: BigDecimal, medio: MedioPago, fecha: LocalDate): Pago
+    + registrarFalla(equipo: Equipo, descripcion: String, fecha: LocalDateTime): FallaEquipo
+    + generarOrden(falla: FallaEquipo, tecnico: EmpleadoMantenimiento, fecha: LocalDateTime): OrdenMantenimiento
+    + registrarIngreso(documento: String, lote: Lote, guardia: Guardia, fecha: LocalDateTime): RegistroIngreso
+    + registrarEgreso(registro: RegistroIngreso, fecha: LocalDateTime): void
+    + evaluarPlazos(ahora: LocalDateTime): void
+    + emitirReporte(tipo: TipoReporte, fecha: LocalDate): String
+    + guardar(ruta: String): void
+    + cargar(ruta: String): void
+  }
+
+class Persona {
+    - nombre: String
+    - apellido: String
+    - documento: String
+    - telefono: String
+    - correoElectronico: String
+    + Persona(nombre: String, apellido: String, documento: String, telefono: String, correo: String)
+    + getDocumento(): String
+    + actualizarContacto(telefono: String, correo: String): void
+  }
+
+class Lote {
+    - numero: int
+    - superficie: double
+    - moroso: boolean
+    + Lote(numero: int, superficie: double)
+    + calcularCoeficiente(superficieTotal: double): double
+    + estaAutorizada(persona: Persona, fecha: LocalDate): boolean
+    + calcularDeuda(fecha: LocalDate): BigDecimal
+    + actualizarMorosidad(fecha: LocalDate): void
+  }
+
+class Residencia {
+    - tipo: TipoResidente
+    - desde: LocalDate
+    - hasta: LocalDate
+    - autorizadaPorTitular: boolean
+    + estaVigente(fecha: LocalDate): boolean
+    + autorizar(): void
+    + finalizar(fecha: LocalDate): void
+  }
+
+enum TipoResidente {
+    TITULAR
+    FAMILIAR
+    INQUILINO
+  }
+
+abstract class Empleado {
+    - legajo: String
+    - nombre: String
+    - fechaIngreso: LocalDate
+    # Empleado(legajo: String, nombre: String, ingreso: LocalDate)
+    + getLegajo(): String
+    + {abstract} describirRol(): String
+  }
+
+class Administrador {
+    + describirRol(): String
+  }
+
+class Guardia {
+    - turno: String
+    - puesto: PuestoGuardia
+    + describirRol(): String
+    + estaEnPorteria(): boolean
+  }
+
+class EmpleadoMantenimiento {
+    - especialidad: Especialidad
+    + describirRol(): String
+    + getEspecialidad(): Especialidad
+  }
+
+enum PuestoGuardia {
+    PORTERIA
+    RONDA
+    MONITOREO
+  }
+
+enum Especialidad {
+    ELECTRICIDAD
+    PLOMERIA
+    JARDINERIA
+  }
+
+enum TipoReporte {
+    RECLAMOS_PENDIENTES
+    MOROSIDAD
+    EQUIPOS_FUERA_DE_SERVICIO
+  }
+Barrio "1" *-- "150" Lote
+Lote "1" *-- "1..*" Residencia
+Persona "1" -- "0..*" Residencia
+Empleado <|-- Administrador
+Empleado <|-- Guardia
+Empleado <|-- EmpleadoMantenimiento
+@enduml

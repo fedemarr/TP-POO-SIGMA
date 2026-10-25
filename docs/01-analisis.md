@@ -1,6 +1,6 @@
 # SIGMA — Análisis del enunciado
 
-Borrador de la etapa 1, integrado a partir del trabajo previo del equipo. Los supuestos son decisiones propuestas; deben contrastarse con la consigna original antes de la entrega.
+El análisis identifica actores, requisitos funcionales, reglas de negocio y seis supuestos cotidianos adoptados.
 
 
 ## 1.1 Actores
@@ -18,7 +18,7 @@ Borrador de la etapa 1, integrado a partir del trabajo previo del equipo. Los su
 | --- | --- | --- |
 | RF-01 | Registrar un reclamo o solicitud indicando lote, tipo y descripción | Vecino |
 | RF-02 | Asignar un reclamo a un empleado responsable | Administrador |
-| RF-03 | Actualizar el estado de un reclamo dejando registro de la evolución | Empleado de mantenimiento |
+| RF-03 | Actualizar el estado de un reclamo dejando registro de la evolución | Personal responsable, Administrador |
 | RF-04 | Agregar comentarios a un reclamo | Vecino, Empleado |
 | RF-05 | Consultar el seguimiento completo de un reclamo | Vecino |
 | RF-06 | Reabrir un reclamo resuelto dentro del plazo | Vecino |

@@ -1,0 +1,161 @@
+@startuml 06-arquitectura
+title SIGMA - Modelo final   arquitectura
+scale max 3800*3800
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+hide members
+
+class ConsolaSIGMA {
+    + ejecutarMenu(): void
+  }
+
+class GestorReclamos {
+    + registrarReclamo(lote: Lote, solicitante: Persona, tipo: TipoReclamo, descripcion: String, fecha: LocalDateTime): Reclamo
+    + asignarReclamo(reclamo: Reclamo, empleado: Empleado, fecha: LocalDateTime): void
+    + cambiarEstado(reclamo: Reclamo, empleado: Empleado, nuevo: EstadoReclamo, observacion: String, fecha: LocalDateTime): void
+    + reabrir(reclamo: Reclamo, vecino: Persona, motivo: String, fecha: LocalDateTime): void
+    + agregarComentario(reclamo: Reclamo, autor: String, texto: String, fecha: LocalDateTime): void
+    + consultarSeguimiento(reclamo: Reclamo, vecino: Persona): Reclamo
+    + consultarPendientes(ahora: LocalDateTime): List<Reclamo>
+    + verificarPlazos(ahora: LocalDateTime): void
+  }
+
+class GestorExpensas {
+    - expensas: RepositorioExpensas
+    - pagos: RepositorioPagos
+    - mora: CalculadoraMora
+    + GestorExpensas(expensas: RepositorioExpensas, pagos: RepositorioPagos, mora: CalculadoraMora)
+    + emitirExpensas(barrio: Barrio, periodo: YearMonth, presupuesto: BigDecimal): void
+    + registrarPago(lote: Lote, importe: BigDecimal, medio: MedioPago, fecha: LocalDate): Pago
+    + registrarAjuste(pago: Pago, importe: BigDecimal, motivo: String, fecha: LocalDate): AjustePago
+    + consultarCuenta(lote: Lote, fecha: LocalDate): BigDecimal
+    + aplicarSaldosAFavor(lote: Lote, fecha: LocalDate): void
+    + verificarMorosidad(fecha: LocalDate): void
+  }
+
+class GestorAccesos {
+    - autorizaciones: RepositorioAutorizaciones
+    - ingresos: RepositorioIngresos
+    + GestorAccesos(autorizaciones: RepositorioAutorizaciones, ingresos: RepositorioIngresos)
+    + autorizarVisita(otorgante: Persona, lote: Lote, visitante: Visitante, desde: LocalDate, hasta: LocalDate, horaDesde: LocalTime, horaHasta: LocalTime, recurrente: boolean): Autorizacion
+    + registrarIngreso(documento: String, lote: Lote, guardia: Guardia, fecha: LocalDateTime): RegistroIngreso
+    + registrarEgreso(documento: String, fecha: LocalDateTime): void
+  }
+
+class GestorMantenimiento {
+    + registrarFalla(equipo: Equipo, autor: String, descripcion: String, fecha: LocalDateTime): FallaEquipo
+    + generarOrden(administrador: Administrador, falla: FallaEquipo, tecnico: EmpleadoMantenimiento, fecha: LocalDateTime): OrdenMantenimiento
+    + cerrarOrden(orden: OrdenMantenimiento, tecnico: EmpleadoMantenimiento, descripcion: String, fecha: LocalDateTime): void
+    + consultarEquipos(ahora: LocalDateTime): List<Equipo>
+    + verificarPlazos(ahora: LocalDateTime): void
+  }
+
+class GestorReportes {
+    + reclamosPendientes(ahora: LocalDateTime): String
+    + morosidad(fecha: LocalDate): String
+    + equiposFueraDeServicio(ahora: LocalDateTime): String
+    + exportar(texto: String, ruta: String): void
+  }
+
+class PlanificadorPlazos {
+    + ejecutar(ahora: LocalDateTime): void
+  }
+
+class CalculadoraMora {
+    - tasaMensual: BigDecimal
+    + calcular(expensa: Expensa, fecha: LocalDate): BigDecimal
+  }
+
+interface RepositorioExpensas {
+    + buscarPorLote(lote: Lote): List<Expensa>
+    + existePeriodo(periodo: YearMonth): boolean
+    + guardar(expensa: Expensa): void
+  }
+
+interface RepositorioPagos {
+    + siguienteNumero(): int
+    + guardar(pago: Pago): void
+    + confirmarPago(pago: Pago, expensas: List<Expensa>, lote: Lote): void
+    + buscarPorLote(lote: Lote): List<Pago>
+    + confirmarAjuste(pago: Pago, ajuste: AjustePago, expensas: List<Expensa>, lote: Lote): void
+  }
+
+interface RepositorioAutorizaciones {
+    + buscar(documento: String, lote: Lote): List<Autorizacion>
+    + guardar(autorizacion: Autorizacion): void
+  }
+
+interface RepositorioIngresos {
+    + buscarAbierto(documento: String): RegistroIngreso
+    + guardar(registro: RegistroIngreso): void
+  }
+
+interface RepositorioReclamos {
+    + listar(): List<Reclamo>
+    + contarEnCurso(empleado: Empleado): int
+    + guardar(reclamo: Reclamo): void
+  }
+
+interface RepositorioEquipos {
+    + listar(): List<Equipo>
+    + guardar(equipo: Equipo): void
+    + guardarOrden(orden: OrdenMantenimiento): void
+  }
+
+class RepositorioExpensasArchivo
+
+class RepositorioPagosArchivo
+
+class RepositorioAutorizacionesArchivo
+
+class RepositorioIngresosArchivo
+
+class RepositorioReclamosArchivo
+
+class RepositorioEquiposArchivo
+
+class RepositorioExpensasMemoria
+
+class RepositorioPagosMemoria
+
+interface RepositorioNotificaciones {
+    + guardarSiNoExiste(notificacion: Notificacion): boolean
+  }
+
+class RepositorioNotificacionesArchivo
+ConsolaSIGMA --> GestorReclamos
+ConsolaSIGMA --> GestorExpensas
+ConsolaSIGMA --> GestorAccesos
+ConsolaSIGMA --> GestorMantenimiento
+ConsolaSIGMA --> GestorReportes
+GestorReclamos --> RepositorioReclamos
+GestorExpensas --> RepositorioExpensas
+GestorExpensas --> RepositorioPagos
+GestorExpensas --> CalculadoraMora
+GestorAccesos --> RepositorioAutorizaciones
+GestorAccesos --> RepositorioIngresos
+GestorMantenimiento --> RepositorioEquipos
+GestorReportes --> RepositorioReclamos
+GestorReportes --> RepositorioExpensas
+GestorReportes --> RepositorioEquipos
+GestorReportes --> CalculadoraMora
+RepositorioExpensas <|.. RepositorioExpensasArchivo
+RepositorioPagos <|.. RepositorioPagosArchivo
+RepositorioAutorizaciones <|.. RepositorioAutorizacionesArchivo
+RepositorioIngresos <|.. RepositorioIngresosArchivo
+RepositorioReclamos <|.. RepositorioReclamosArchivo
+RepositorioEquipos <|.. RepositorioEquiposArchivo
+RepositorioExpensas <|.. RepositorioExpensasMemoria
+RepositorioPagos <|.. RepositorioPagosMemoria
+ConsolaSIGMA --> PlanificadorPlazos
+PlanificadorPlazos --> GestorReclamos
+PlanificadorPlazos --> GestorMantenimiento
+PlanificadorPlazos --> GestorExpensas
+GestorReclamos --> RepositorioNotificaciones
+GestorMantenimiento --> RepositorioNotificaciones
+GestorExpensas --> RepositorioNotificaciones
+RepositorioNotificaciones <|.. RepositorioNotificacionesArchivo
+@enduml

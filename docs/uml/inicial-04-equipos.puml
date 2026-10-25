@@ -1,0 +1,86 @@
+@startuml inicial-04-equipos
+title SIGMA - Modelo inicial   equipos
+scale max 3800*3800
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+abstract class Equipo {
+    - codigo: String
+    - fechaInstalacion: LocalDate
+    - estado: EstadoEquipo
+    # Equipo(codigo: String, sector: Sector, instalacion: LocalDate)
+    + registrarFalla(descripcion: String, fecha: LocalDateTime): FallaEquipo
+    + cambiarEstado(nuevo: EstadoEquipo): void
+    + {abstract} prioridadDeFalla(falladasEnSector: int): PrioridadOrden
+  }
+
+class Camara {
+    - resolucion: String
+    - diasGrabacion: int
+    + prioridadDeFalla(falladasEnSector: int): PrioridadOrden
+    + requiereAviso(ahora: LocalDateTime): boolean
+  }
+
+class Luminaria {
+    - tipoLampara: String
+    - potencia: double
+    + prioridadDeFalla(falladasEnSector: int): PrioridadOrden
+  }
+
+class Sector {
+    - nombre: String
+    + contarLuminariasFalladas(): int
+  }
+
+class FallaEquipo {
+    - fecha: LocalDateTime
+    - descripcion: String
+    - registradaPor: String
+  }
+
+class OrdenMantenimiento {
+    - numero: int
+    - apertura: LocalDateTime
+    - prioridad: PrioridadOrden
+    - descripcionTrabajo: String
+    - cierre: LocalDateTime
+    - descripcionReparacion: String
+    + iniciarReparacion(): void
+    + cerrar(fecha: LocalDateTime, tecnico: EmpleadoMantenimiento, descripcion: String): void
+    + elevarPrioridad(): void
+  }
+
+enum EstadoEquipo {
+    OPERATIVO
+    CON_FALLA
+    EN_REPARACION
+    FUERA_DE_SERVICIO
+  }
+
+enum PrioridadOrden {
+    ALTA
+    NORMAL
+  }
+
+class EmpleadoMantenimiento {
+    - especialidad: Especialidad
+    + describirRol(): String
+    + getEspecialidad(): Especialidad
+  }
+
+enum Especialidad {
+    ELECTRICIDAD
+    PLOMERIA
+    JARDINERIA
+  }
+Equipo <|-- Camara
+Equipo <|-- Luminaria
+Sector "1" -- "0..*" Equipo
+Equipo "1" *-- "0..*" FallaEquipo
+Equipo "1" -- "0..*" OrdenMantenimiento
+FallaEquipo "1" -- "0..1" OrdenMantenimiento
+EmpleadoMantenimiento "1" -- "0..*" OrdenMantenimiento : tecnico
+@enduml

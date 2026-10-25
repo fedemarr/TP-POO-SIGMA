@@ -1,0 +1,84 @@
+@startuml 03-expensas
+title SIGMA - Modelo final   expensas
+scale max 3800*3800
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class Expensa {
+    - periodo: YearMonth
+    - importe: BigDecimal
+    - vencimiento: LocalDate
+    - estado: EstadoExpensa
+    + capitalPendiente(): BigDecimal
+    + interesPendiente(fecha: LocalDate, mora: CalculadoraMora): BigDecimal
+    + calcularSaldo(fecha: LocalDate, mora: CalculadoraMora): BigDecimal
+    + aplicarImputacion(imputacion: Imputacion): void
+  }
+
+class Pago {
+    - numero: int
+    - fecha: LocalDate
+    - importe: BigDecimal
+    - medio: MedioPago
+    + saldoSinImputar(): BigDecimal
+    + Pago(numero: int, lote: Lote, fecha: LocalDate, importe: BigDecimal, medio: MedioPago)
+    + imputar(expensas: List<Expensa>, fecha: LocalDate, mora: CalculadoraMora): void
+    + registrarAjuste(importe: BigDecimal, motivo: String, fecha: LocalDate): AjustePago
+    + estaRevertido(): boolean
+  }
+
+class Imputacion {
+    - fecha: LocalDate
+    - importeInteres: BigDecimal
+    - importeCapital: BigDecimal
+    + Imputacion(expensa: Expensa, fecha: LocalDate, interes: BigDecimal, capital: BigDecimal)
+    + calcularTotal(): BigDecimal
+    + crearReversion(fecha: LocalDate): Imputacion
+  }
+
+class AjustePago {
+    - numero: int
+    - fecha: LocalDate
+    - importe: BigDecimal
+    - motivo: String
+  }
+
+enum MedioPago {
+    EFECTIVO
+    TRANSFERENCIA
+    TARJETA
+  }
+
+enum EstadoExpensa {
+    IMPAGA
+    PARCIAL
+    PAGADA
+  }
+
+class Lote {
+    - numero: int
+    - superficie: double
+    - moroso: boolean
+    + Lote(numero: int, superficie: double)
+    + calcularCoeficiente(superficieTotal: double): double
+    + estaAutorizada(persona: Persona, fecha: LocalDate): boolean
+    + calcularDeuda(fecha: LocalDate, mora: CalculadoraMora): BigDecimal
+    + actualizarMorosidad(expensas: List<Expensa>, fecha: LocalDate): boolean
+  }
+
+class CalculadoraMora {
+    - tasaMensual: BigDecimal
+    + calcular(expensa: Expensa, fecha: LocalDate): BigDecimal
+  }
+Lote "1" *-- "0..*" Expensa
+Lote "1" -- "0..*" Pago
+Pago "1" *-- "0..*" Imputacion
+Expensa "1" -- "0..*" Imputacion
+Pago "1" *-- "0..*" AjustePago
+Expensa ..> CalculadoraMora
+Pago ..> CalculadoraMora
+AjustePago "0..1" -- "0..*" Imputacion : identifica contraimputaciones
+@enduml
