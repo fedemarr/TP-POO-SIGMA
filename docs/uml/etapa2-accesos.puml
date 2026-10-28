@@ -1,0 +1,176 @@
+@startuml etapa2-accesos
+title SIGMA - Etapa 2: codigo implementado en el primer incremento (accesos)
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName Arial
+skinparam packageStyle rectangle
+hide empty members
+
+package "sigma.modelo" {
+  class Persona {
+    - nombre: String
+    - apellido: String
+    - documento: String
+    - telefono: String
+    - correoElectronico: String
+    + actualizarContacto(telefono: String, correo: String): void
+    + equals(otro: Object): boolean
+    + hashCode(): int
+  }
+  class Lote {
+    - numero: int
+    - superficie: double
+    - residencias: ArrayList<Residencia>
+    + agregarResidencia(residencia: Residencia): void
+    + estaAutorizada(persona: Persona, fecha: LocalDate): boolean
+    + calcularCoeficiente(superficieTotal: double): double
+  }
+  class Residencia {
+    - persona: Persona
+    - tipo: TipoResidente
+    - desde: LocalDate
+    - hasta: LocalDate
+    - autorizadaPorTitular: boolean
+    + estaVigente(fecha: LocalDate): boolean
+    + autorizar(): void
+    + finalizar(fecha: LocalDate): void
+  }
+  enum TipoResidente {
+    TITULAR
+    FAMILIAR
+    INQUILINO
+  }
+  abstract class Empleado {
+    - legajo: String
+    - nombre: String
+    - fechaIngreso: LocalDate
+    # Empleado(legajo: String, nombre: String, fechaIngreso: LocalDate)
+    + {abstract} describirRol(): String
+  }
+  class Guardia {
+    - turno: String
+    - puesto: PuestoGuardia
+    + describirRol(): String
+    + estaEnPorteria(): boolean
+  }
+  enum PuestoGuardia {
+    PORTERIA
+    RONDA
+    MONITOREO
+  }
+  class Visitante {
+    - nombre: String
+    - documento: String
+  }
+  class Autorizacion {
+    - id: String
+    - otorgante: Persona
+    - lote: Lote
+    - visitante: Visitante
+    - desde: LocalDate
+    - hasta: LocalDate
+    - horaDesde: LocalTime
+    - horaHasta: LocalTime
+    - recurrente: boolean
+    + validarDuracion(): void
+    + estaVigente(fecha: LocalDateTime): boolean
+    + mismaVigencia(otra: Autorizacion): boolean
+  }
+  class RegistroIngreso {
+    - id: String
+    - autorizacion: Autorizacion
+    - guardia: Guardia
+    - ingreso: LocalDateTime
+    - egreso: LocalDateTime
+    + RegistroIngreso(autorizacion: Autorizacion, guardia: Guardia, ingreso: LocalDateTime)
+    + estaAbierto(): boolean
+    + registrarEgreso(fecha: LocalDateTime): void
+    + compareTo(otro: RegistroIngreso): int
+  }
+  interface "Comparable<RegistroIngreso>" as Comparable
+}
+
+package "sigma.gestores" {
+  class GestorAccesos {
+    - autorizaciones: RepositorioAutorizaciones
+    - ingresos: RepositorioIngresos
+    + GestorAccesos(autorizaciones: RepositorioAutorizaciones, ingresos: RepositorioIngresos)
+    + autorizarVisita(otorgante: Persona, lote: Lote, visitante: Visitante, desde: LocalDate, hasta: LocalDate, horaDesde: LocalTime, horaHasta: LocalTime, recurrente: boolean): Autorizacion
+    + registrarIngreso(documento: String, lote: Lote, guardia: Guardia, fecha: LocalDateTime): RegistroIngreso
+    + registrarEgreso(documento: String, fecha: LocalDateTime): void
+  }
+}
+
+package "sigma.repositorios" {
+  interface RepositorioAutorizaciones {
+    + buscar(documento: String, lote: Lote): List<Autorizacion>
+    + listar(): List<Autorizacion>
+    + guardar(autorizacion: Autorizacion): void
+  }
+  interface RepositorioIngresos {
+    + buscarAbierto(documento: String): RegistroIngreso
+    + listar(): List<RegistroIngreso>
+    + guardar(registro: RegistroIngreso): void
+  }
+}
+
+package "sigma.persistencia" {
+  class AlmacenAccesos {
+    - archivo: Path
+    - leer(): Estado
+    - escribir(estado: Estado): void
+    + leerAutorizaciones(): List<Autorizacion>
+    + leerIngresos(): List<RegistroIngreso>
+    + guardarAutorizacion(autorizacion: Autorizacion): void
+    + guardarIngreso(registro: RegistroIngreso): void
+  }
+  class RepositorioAutorizacionesArchivo
+  class RepositorioIngresosArchivo
+}
+
+package "sigma.consola" {
+  class DatosDemostracion
+  class MenuAccesos {
+    + ejecutar(): void
+  }
+}
+class "sigma.Main" as Main {
+  + {static} main(argumentos: String[]): void
+}
+
+package "sigma.excepciones" {
+  class ReglaNegocioException
+  class AutorizacionInvalidaException
+  class IngresoDuplicadoException
+}
+
+Lote "1" *-- "0..*" Residencia
+Persona "1" -- "0..*" Residencia
+Empleado <|-- Guardia
+Persona "1" -- "0..*" Autorizacion : otorgante
+Lote "1" -- "0..*" Autorizacion
+Visitante "1" -- "0..*" Autorizacion
+Autorizacion "1" -- "0..*" RegistroIngreso
+Guardia "1" -- "0..*" RegistroIngreso
+Comparable <|.. RegistroIngreso
+GestorAccesos --> RepositorioAutorizaciones
+GestorAccesos --> RepositorioIngresos
+RepositorioAutorizaciones <|.. RepositorioAutorizacionesArchivo
+RepositorioIngresos <|.. RepositorioIngresosArchivo
+RepositorioAutorizacionesArchivo --> AlmacenAccesos
+RepositorioIngresosArchivo --> AlmacenAccesos
+MenuAccesos --> GestorAccesos
+MenuAccesos --> DatosDemostracion
+MenuAccesos --> RepositorioAutorizaciones
+MenuAccesos --> RepositorioIngresos
+Main ..> MenuAccesos : crea e inyecta dependencias
+ReglaNegocioException <|-- AutorizacionInvalidaException
+ReglaNegocioException <|-- IngresoDuplicadoException
+
+legend bottom
+  Diagrama parcial: solo codigo existente. Los demas modulos siguen pendientes.
+  Se omiten getters y constructores auxiliares. Los objetos de dominio implementan Serializable.
+  Los repositorios propagan IOException; el gestor tambien propaga ReglaNegocioException.
+  El padron admite carga gradual; exigir los 150 lotes completos sigue pendiente.
+endlegend
+@enduml

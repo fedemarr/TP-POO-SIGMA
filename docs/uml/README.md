@@ -2,6 +2,13 @@
 
 Cada diagrama se entrega en tres formatos: fuente PlantUML (.puml), vector (.svg) e imagen (.png). Para leer y ampliar conviene SVG; para editar, utilizar la fuente PlantUML.
 
+## Etapa 2: código actual
+
+- [Clases implementadas de accesos](etapa2-accesos.svg) y [fuente](etapa2-accesos.puml).
+- [Secuencia de ingreso implementada](etapa2-secuencia-ingreso.svg) y [fuente](etapa2-secuencia-ingreso.puml).
+
+Estas vistas representan el primer incremento. El modelo completo de etapa 1 sigue siendo la referencia para los módulos pendientes. Las precisiones de implementación se explican en [avance de etapa 2](../07-etapa-2-avance.md).
+
 ## Casos de uso
 
 - [Diagrama](casos-de-uso.svg)

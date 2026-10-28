@@ -1,0 +1,61 @@
+@startuml etapa2-secuencia-ingreso
+title SIGMA - Etapa 2: ingreso de visita implementado
+skinparam shadowing false
+skinparam defaultFontName Arial
+autonumber
+actor Guardia as Actor
+participant "gestor: GestorAccesos" as Gestor
+participant "guardia: Guardia" as Guardia
+participant "autorizaciones: RepositorioAutorizaciones" as Autorizaciones
+participant "candidata: Autorizacion" as Autorizacion
+participant "ingresos: RepositorioIngresos" as Ingresos
+
+Actor -> Gestor: registrarIngreso(documento, lote, guardia, fecha)
+Gestor -> Guardia: estaEnPorteria()
+Guardia --> Gestor: boolean
+alt No esta en porteria
+  Gestor --> Actor: ReglaNegocioException
+else Esta en porteria
+  Gestor -> Autorizaciones: buscar(documento, lote)
+  Autorizaciones --> Gestor: List<Autorizacion>
+  loop Hasta encontrar una vigente
+    Gestor -> Autorizacion: estaVigente(fecha)
+    Autorizacion --> Gestor: boolean
+  end
+  alt Sin autorizacion vigente
+    Gestor --> Actor: AutorizacionInvalidaException
+  else Existe autorizacion vigente
+    Gestor -> Ingresos: buscarAbierto(documento)
+    Ingresos --> Gestor: RegistroIngreso o null
+    alt Ya existe ingreso abierto
+      Gestor --> Actor: IngresoDuplicadoException
+    else No existe ingreso abierto
+      Gestor -> Ingresos: listar()
+      Ingresos --> Gestor: List<RegistroIngreso>
+      note over Gestor
+        Comprueba que fecha no sea anterior
+        a un egreso previo de la misma persona.
+      end note
+      alt Cronologia invalida
+        Gestor --> Actor: ReglaNegocioException
+      else Cronologia valida
+        create participant "nuevo: RegistroIngreso" as Nuevo
+        Gestor -> Nuevo: RegistroIngreso(autorizacion, guardia, fecha)
+        Gestor -> Ingresos: guardar(nuevo)
+        alt Fallo de escritura
+          Ingresos --> Gestor: IOException
+          Gestor --> Actor: Operacion no confirmada
+        else Guardado correcto
+          Ingresos --> Gestor: void
+          Gestor --> Actor: RegistroIngreso
+        end
+      end
+    end
+  end
+end
+legend bottom
+  La consola valida formato de entrada y muestra el resultado o error.
+  Los errores de lectura de repositorios tambien se propagan como IOException.
+  guardar solo retorna tras completar el reemplazo atomico del archivo.
+endlegend
+@enduml
