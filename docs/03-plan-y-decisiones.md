@@ -13,13 +13,15 @@
 
 El [PDF de diseño](SIGMA-Documento-de-Diseno-Etapa-1.pdf) contiene los siete puntos de la consigna de entrega. Los diagramas son vectoriales y sus fuentes se conservan en uml/.
 
-## Etapa 2: implementación pendiente
+## Etapa 2: implementación
 
-- Implementar el diseño en Java y actualizar los diagramas si el código requiere cambios.
-- Desarrollar el menú de consola, la persistencia en archivos y el manejo de excepciones.
-- Incorporar los ordenamientos con Comparable y Comparator.
-- Ejecutar pruebas unitarias y funcionales, registrando resultados.
-- Completar instrucciones de ejecución y datos de prueba en el README.
-- Preparar informe final y demostración para la defensa.
+- [x] Implementar el diseño en Java y actualizar los diagramas del modelo final con lo que agregó el código ([detalle](07-implementacion.md)).
+- [x] Desarrollar el menú de consola, la interfaz gráfica, la persistencia en archivos y el manejo de excepciones.
+- [x] Incorporar los ordenamientos con Comparable y Comparator.
+- [x] Pruebas unitarias sobre la lógica de negocio (`test/`).
+- [x] [Plan de pruebas funcionales](08-plan-de-pruebas.md) con dato de entrada, resultado esperado y resultado obtenido.
+- [x] Completar instrucciones de ejecución y datos de prueba en el README.
+- [x] [Informe final](09-informe-final.md).
+- [ ] Preparar la demostración para la defensa.
 
 La incorporación del docente como colaborador, la revisión entre compañeros y los commits propios de cada integrante deben comprobarse en GitHub por el equipo. Este documento no acredita esas acciones administrativas.

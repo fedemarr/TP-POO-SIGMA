@@ -15,13 +15,17 @@ El modelo final aplica las decisiones justificadas en [SOLID y GRASP](04-solid-y
 | Historial | Reclamo contiene CambioEstado. | Se conserva la composición y se exige crear el registro al validar y aplicar cada cambio de estado. | Hacer explícito Creador y mantener el historial consistente. |
 | Pago | La secuencia no detalla la confirmación de todos los datos relacionados. | confirmarPago recibe el pago, las expensas modificadas y el lote. Un error descarta las copias de trabajo. | Evitar un pago confirmado con imputaciones o saldos incompletos. |
 | Autorizaciones | La consulta no detalla varias autorizaciones candidatas. | El gestor busca por documento y lote y elige una vigente antes de registrar el ingreso. | No rechazar una visita por examinar únicamente una autorización vencida. |
-| Errores | Las excepciones figuran como propuestas en las secuencias. | El modelo incorpora una jerarquía de errores de negocio. Las secuencias también muestran errores de persistencia. | Precisar los resultados alternativos que debe manejar la futura consola. |
+| Errores | Las excepciones figuran como propuestas en las secuencias. | El modelo incorpora una jerarquía de errores de negocio. Las secuencias también muestran errores de persistencia. | Precisar los resultados alternativos que debe manejar la interfaz de usuario. |
 
 ## Precisiones de la revisión final
 
 PlanificadorPlazos y RepositorioNotificaciones permiten evaluar las reglas temporales y evitar avisos repetidos. Pago.imputar recibe la fecha de aplicación, para distinguir el pago original de la aplicación posterior de un saldo a favor. Las órdenes pueden esperar un técnico mientras están abiertas, pero no pueden cerrarse sin ese dato. AjustePago identifica las contraimputaciones, conservando el pago y sus imputaciones originales.
 
 Los [criterios de diseño y operación](05-criterios-diseno.md) precisan mora, ajustes, saldo a favor, plazos y persistencia sin modificar los seis supuestos cotidianos adoptados.
+
+## Ajustes durante la implementación
+
+Al programar el modelo final se agregaron operaciones de apoyo, la interfaz gráfica y el almacenamiento compartido. Los diagramas del modelo final ya incluyen esos agregados y su justificación está en [Implementación: del diseño al código](07-implementacion.md). El PDF conserva el diseño tal como se entregó en la etapa 1.
 
 ## Fuentes principales
 

@@ -1,10 +1,10 @@
 # Criterios de diseño y operación
 
-Los seis supuestos cotidianos se conservan en el análisis. Esta sección precisa los contratos de las operaciones para que los diagramas, la futura implementación y las pruebas usen el mismo criterio. No cambia las tasas, plazos ni límites exigidos por la consigna.
+Los seis supuestos cotidianos se conservan en el análisis. Esta sección precisa los contratos de las operaciones para que los diagramas, la implementación y las pruebas usen el mismo criterio. No cambia las tasas, plazos ni límites exigidos por la consigna.
 
 ## Importes y mora
 
-Los importes se representan con BigDecimal. El capital y el interés se expresan en pesos con dos decimales y redondeo HALF_UP. Los cálculos intermedios conservan precisión y se redondean al confirmar cada imputación. El coeficiente de un lote es su superficie dividida por la suma de superficies de los lotes. Los centavos residuales de la emisión se distribuyen por número de lote para que el total coincida con el presupuesto.
+Los importes se representan con BigDecimal. El capital y el interés se expresan en pesos con dos decimales y redondeo HALF_UP. El interés de cada tramo se calcula con precisión y se redondea a centavos con HALF_UP. El coeficiente de un lote es su superficie dividida por la suma de superficies de los lotes. Los centavos residuales de la emisión se distribuyen por número de lote para que el total coincida con el presupuesto.
 
 El interés es simple y no capitalizable: capital pendiente × 0,03 × días / 30. Se consideran días completos entre el vencimiento y la fecha de consulta o pago. El día del vencimiento tiene cero días de atraso. Un pago parcial cambia la base de capital para el tramo siguiente. Por ejemplo, $10.000 de capital durante diez días generan $100 de interés. Si se pagan $5.100, se cancelan esos $100 y $5.000 de capital; diez días después, el capital restante de $5.000 genera $50 adicionales. Consultar varias veces no duplica intereses. No se admiten pagos futuros ni movimientos anteriores al último movimiento confirmado de la cuenta.
 
@@ -18,7 +18,7 @@ Un lote se marca como moroso al superar tres períodos vencidos con saldo pendie
 
 ## Plazos y notificaciones
 
-PlanificadorPlazos ejecuta la revisión al iniciar la aplicación, antes de operaciones sensibles y una vez por minuto mientras el programa está abierto. Al iniciar recupera las situaciones vencidas durante el tiempo en que el programa estuvo cerrado. Los gestores verifican las fechas exactas, no un conteo de ejecuciones.
+PlanificadorPlazos ejecuta la revisión al iniciar la aplicación y antes de cada operación del menú. En la interfaz gráfica, además, se ejecuta una vez por minuto mientras la ventana está abierta. Al iniciar recupera las situaciones vencidas durante el tiempo en que el programa estuvo cerrado. Los gestores verifican las fechas exactas, no un conteo de ejecuciones.
 
 Un reclamo alto sigue sin atender mientras no haya pasado a en curso. Al completar 24 horas genera un aviso. Un reclamo resuelto admite reapertura hasta completar cinco días; después se cierra. Una cámara no operativa por más de 48 horas genera aviso al administrador. RepositorioNotificaciones guarda una clave única por evento para evitar repetir avisos al revisar varias veces. Las notificaciones formales se registran con destinatario, fecha, motivo y referencia, y se consultan en el sistema; no se presupone una integración con correo.
 
@@ -30,6 +30,6 @@ El vecino o guardia registra una falla; el administrador genera su orden y asign
 
 ## Persistencia y tipos
 
-Las interfaces de repositorio aíslan a los gestores de los archivos. Sus implementaciones comparten el almacenamiento de la aplicación. La confirmación de pago guarda pago, imputaciones, ajustes aplicables, expensas y lote como una instantánea conjunta, mediante un archivo temporal y reemplazo atómico. Ante un error se conserva el estado vigente y se descartan las copias de trabajo. Los repositorios no confirman parcialmente una operación financiera. En la etapa 2 se manejarán IOException y excepciones de negocio con try, catch y finally.
+Las interfaces de repositorio aíslan a los gestores de los archivos. Sus implementaciones comparten el almacenamiento de la aplicación. Todos los repositorios de archivo comparten un único archivo de datos (`data/sigma.dat`). La confirmación de pago guarda pago, imputaciones, ajustes aplicables, expensas y lote como una instantánea conjunta: primero se escribe un archivo temporal y, cuando está completo, reemplaza al anterior. Si el programa se interrumpe durante el reemplazo, al iniciar se recupera desde el temporal. Ante un error se conserva el último estado guardado y se descartan los cambios en memoria. Los repositorios no confirman parcialmente una operación financiera. IOException y las excepciones de negocio se manejan con try, catch y finally.
 
 El modelo final conserva al administrador dentro de la jerarquía Empleado para reutilizar legajo, nombre y fecha de ingreso. Los constructores y operaciones mostrados son los relevantes para el diseño; los getters necesarios no se repiten de forma exhaustiva. Las implementaciones Archivo realizan los contratos heredados de sus interfaces, aunque el diagrama omita las firmas repetidas. Las implementaciones Memoria se reservan para pruebas.

@@ -34,4 +34,6 @@ Cada diagrama se entrega en tres formatos: fuente PlantUML (.puml), vector (.svg
 - [CU-22: ingreso de visita](secuencia-ingreso-final.svg)
 - [CU-12: registro de pago](secuencia-pago-final.svg)
 
+Los diagramas del modelo final y la secuencia de pago se actualizaron en la etapa 2 con lo que agregó la implementación; el detalle está en [Implementación](../07-implementacion.md). Los diagramas del modelo inicial no cambian. El PDF conserva las láminas de la entrega de la etapa 1.
+
 Las vistas por módulo se obtienen del mismo modelo completo. El PDF contiene las láminas necesarias para leer sus atributos, operaciones y relaciones sin reducir todo el sistema a una sola página.

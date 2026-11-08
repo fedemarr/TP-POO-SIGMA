@@ -21,6 +21,11 @@ class Reclamo {
     + requiereEscalamiento(ahora: LocalDateTime): boolean
     + cerrarPorPlazo(ahora: LocalDateTime): void
     + compareTo(otro: Reclamo): int
+    + Reclamo(numero: int, fecha: LocalDateTime, tipo: TipoReclamo, descripcion: String)
+    + vincular(lote: Lote, solicitante: Persona): void
+    + perteneceA(persona: Persona): boolean
+    + estaPendiente(): boolean
+    + estaEnCursoDe(empleado: Empleado): boolean
   }
 
 class CambioEstado {
@@ -85,6 +90,10 @@ class Lote {
     + estaAutorizada(persona: Persona, fecha: LocalDate): boolean
     + calcularDeuda(fecha: LocalDate, mora: CalculadoraMora): BigDecimal
     + actualizarMorosidad(expensas: List<Expensa>, fecha: LocalDate): boolean
+    + agregarResidencia(residencia: Residencia): void
+    + obtenerTitular(fecha: LocalDate): Persona
+    + buscarResidente(documento: String, fecha: LocalDate): Persona
+    + agregarExpensa(expensa: Expensa): void
   }
 Lote "1" -- "0..*" Reclamo
 Persona "1" -- "0..*" Reclamo : solicitante

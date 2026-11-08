@@ -15,6 +15,11 @@ abstract class Equipo {
     + registrarFalla(descripcion: String, fecha: LocalDateTime): FallaEquipo
     + cambiarEstado(nuevo: EstadoEquipo): void
     + {abstract} prioridadDeFalla(falladasEnSector: int): PrioridadOrden
+    + registrarFalla(descripcion: String, fecha: LocalDateTime, autor: String): FallaEquipo
+    + fallaAbierta(): FallaEquipo
+    + contieneFalla(falla: FallaEquipo): boolean
+    + getNombreSector(): String
+    + {abstract} getTipo(): String
   }
 
 class Camara {
@@ -22,17 +27,20 @@ class Camara {
     - diasGrabacion: int
     + prioridadDeFalla(falladasEnSector: int): PrioridadOrden
     + requiereAviso(ahora: LocalDateTime): boolean
+    + getTipo(): String
   }
 
 class Luminaria {
     - tipoLampara: String
     - potencia: double
     + prioridadDeFalla(falladasEnSector: int): PrioridadOrden
+    + getTipo(): String
   }
 
 class Sector {
     - nombre: String
     + contarLuminariasFalladas(): int
+    + agregarEquipo(equipo: Equipo): void
   }
 
 class FallaEquipo {
@@ -53,6 +61,9 @@ class OrdenMantenimiento {
     + cerrar(fecha: LocalDateTime, tecnico: EmpleadoMantenimiento, descripcion: String): void
     + elevarPrioridad(): void
     + agregarObservacion(texto: String): void
+    + asignarTecnico(tecnico: EmpleadoMantenimiento): void
+    + cerrarSinReparacion(fecha: LocalDateTime, tecnico: EmpleadoMantenimiento, descripcion: String): void
+    + estaAbierta(): boolean
   }
 
 enum EstadoEquipo {

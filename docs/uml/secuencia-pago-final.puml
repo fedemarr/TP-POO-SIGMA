@@ -15,7 +15,7 @@ participant "lote: Lote" as Lote
 
 Actor -> Gestor: registrarPago(lote, importe, medio, fecha)
 activate Gestor
-alt Importe no positivo o medio de pago invalido
+alt Importe no positivo, medio invalido, fecha futura o anterior al ultimo movimiento
   Gestor --> Actor: PagoInvalidoException
 else Datos validos
   Gestor -> RE: buscarPorLote(lote)
@@ -30,8 +30,8 @@ else Datos validos
     E --> E: capital: BigDecimal
     E -> E: interesPendiente(fecha, mora)
     opt Hay periodos de atraso con capital impago
-      E -> Mora: calcular(expensa, fecha)
-      Mora --> E: interesDevengado: BigDecimal
+      E -> Mora: interesPorDias(capital, dias)
+      Mora --> E: interesTramo: BigDecimal
     end
     E --> E: interesPendiente: BigDecimal
     E --> Gestor: saldo: BigDecimal
@@ -49,8 +49,8 @@ else Datos validos
       P -> P: saldoSinImputar()
       P --> P: disponible: BigDecimal
       P -> E: interesPendiente(fecha, mora)
-      E -> Mora: calcular(expensa, fecha)
-      Mora --> E: interesDevengado: BigDecimal
+      E -> Mora: interesPorDias(capital, dias)
+      Mora --> E: interesTramo: BigDecimal
       E --> P: interesPendiente: BigDecimal
       P -> E: capitalPendiente()
       E --> P: capitalPendiente: BigDecimal
@@ -67,8 +67,6 @@ else Datos validos
     end
     P --> Gestor: void
     deactivate P
-    Gestor -> P: saldoSinImputar()
-    P --> Gestor: saldoAFavor: BigDecimal
     Gestor -> Lote: actualizarMorosidad(expensas, fecha)
     Lote --> Gestor: moroso: boolean
     Gestor -> RP: confirmarPago(pago, expensas, lote)
@@ -83,7 +81,7 @@ else Datos validos
 end
 deactivate Gestor
 legend bottom
-  calcular() es una consulta: repetirla no acumula intereses.
+  interesPendiente() es una consulta: repetirla no acumula intereses.
   interesPendiente descuenta los intereses ya imputados.
   confirmarPago conserva pago, imputaciones, expensas y lote de forma conjunta.
   El saldo a favor queda en el pago como importe sin imputar.

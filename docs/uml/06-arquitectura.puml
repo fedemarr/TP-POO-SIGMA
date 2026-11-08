@@ -10,9 +10,12 @@ hide members
 
 class ConsolaSIGMA {
     + ejecutarMenu(): void
+    + ConsolaSIGMA(aplicacion: AplicacionSIGMA)
   }
 
 class GestorReclamos {
+    - reclamos: RepositorioReclamos
+    - notificaciones: RepositorioNotificaciones
     + registrarReclamo(lote: Lote, solicitante: Persona, tipo: TipoReclamo, descripcion: String, fecha: LocalDateTime): Reclamo
     + asignarReclamo(reclamo: Reclamo, empleado: Empleado, fecha: LocalDateTime): void
     + cambiarEstado(reclamo: Reclamo, empleado: Empleado, nuevo: EstadoReclamo, observacion: String, fecha: LocalDateTime): void
@@ -21,19 +24,25 @@ class GestorReclamos {
     + consultarSeguimiento(reclamo: Reclamo, vecino: Persona): Reclamo
     + consultarPendientes(ahora: LocalDateTime): List<Reclamo>
     + verificarPlazos(ahora: LocalDateTime): void
+    + GestorReclamos(reclamos: RepositorioReclamos, notificaciones: RepositorioNotificaciones)
+    + buscarReclamo(numero: int): Reclamo
   }
 
 class GestorExpensas {
     - expensas: RepositorioExpensas
     - pagos: RepositorioPagos
     - mora: CalculadoraMora
-    + GestorExpensas(expensas: RepositorioExpensas, pagos: RepositorioPagos, mora: CalculadoraMora)
+    - notificaciones: RepositorioNotificaciones
+    + GestorExpensas(expensas: RepositorioExpensas, pagos: RepositorioPagos, mora: CalculadoraMora, notificaciones: RepositorioNotificaciones)
     + emitirExpensas(barrio: Barrio, periodo: YearMonth, presupuesto: BigDecimal): void
     + registrarPago(lote: Lote, importe: BigDecimal, medio: MedioPago, fecha: LocalDate): Pago
     + registrarAjuste(pago: Pago, importe: BigDecimal, motivo: String, fecha: LocalDate): AjustePago
     + consultarCuenta(lote: Lote, fecha: LocalDate): BigDecimal
     + aplicarSaldosAFavor(lote: Lote, fecha: LocalDate): void
     + verificarMorosidad(fecha: LocalDate): void
+    + saldoAFavor(lote: Lote): BigDecimal
+    + consultarPagos(lote: Lote): List<Pago>
+    + consultarExpensas(lote: Lote): List<Expensa>
   }
 
 class GestorAccesos {
@@ -46,11 +55,22 @@ class GestorAccesos {
   }
 
 class GestorMantenimiento {
+    - equipos: RepositorioEquipos
+    - notificaciones: RepositorioNotificaciones
     + registrarFalla(equipo: Equipo, autor: String, descripcion: String, fecha: LocalDateTime): FallaEquipo
     + generarOrden(administrador: Administrador, falla: FallaEquipo, tecnico: EmpleadoMantenimiento, fecha: LocalDateTime): OrdenMantenimiento
     + cerrarOrden(orden: OrdenMantenimiento, tecnico: EmpleadoMantenimiento, descripcion: String, fecha: LocalDateTime): void
     + consultarEquipos(ahora: LocalDateTime): List<Equipo>
     + verificarPlazos(ahora: LocalDateTime): void
+    + GestorMantenimiento(equipos: RepositorioEquipos, notificaciones: RepositorioNotificaciones)
+    + registrarEquipo(equipo: Equipo): void
+    + asignarTecnico(orden: OrdenMantenimiento, tecnico: EmpleadoMantenimiento): void
+    + iniciarReparacion(orden: OrdenMantenimiento): void
+    + cerrarOrdenSinReparacion(orden: OrdenMantenimiento, tecnico: EmpleadoMantenimiento, descripcion: String, fecha: LocalDateTime): void
+    + consultarOrdenes(): List<OrdenMantenimiento>
+    + consultarOrdenesAbiertas(equipo: Equipo): List<OrdenMantenimiento>
+    + buscarEquipo(codigo: String): Equipo
+    + buscarOrden(numero: int): OrdenMantenimiento
   }
 
 class GestorReportes {
@@ -58,21 +78,26 @@ class GestorReportes {
     + morosidad(fecha: LocalDate): String
     + equiposFueraDeServicio(ahora: LocalDateTime): String
     + exportar(texto: String, ruta: String): void
+    + GestorReportes(reclamos: RepositorioReclamos, expensas: RepositorioExpensas, equipos: RepositorioEquipos, mora: CalculadoraMora)
   }
 
 class PlanificadorPlazos {
     + ejecutar(ahora: LocalDateTime): void
+    + PlanificadorPlazos(reclamos: GestorReclamos, mantenimiento: GestorMantenimiento, expensas: GestorExpensas)
   }
 
 class CalculadoraMora {
     - tasaMensual: BigDecimal
     + calcular(expensa: Expensa, fecha: LocalDate): BigDecimal
+    + CalculadoraMora(tasaMensual: BigDecimal)
+    ~ interesPorDias(capital: BigDecimal, dias: long): BigDecimal
   }
 
 interface RepositorioExpensas {
     + buscarPorLote(lote: Lote): List<Expensa>
     + existePeriodo(periodo: YearMonth): boolean
     + guardar(expensa: Expensa): void
+    + listarLotes(): List<Lote>
   }
 
 interface RepositorioPagos {
@@ -103,6 +128,7 @@ interface RepositorioEquipos {
     + listar(): List<Equipo>
     + guardar(equipo: Equipo): void
     + guardarOrden(orden: OrdenMantenimiento): void
+    + listarOrdenes(): List<OrdenMantenimiento>
   }
 
 class RepositorioExpensasArchivo
@@ -123,14 +149,34 @@ class RepositorioPagosMemoria
 
 interface RepositorioNotificaciones {
     + guardarSiNoExiste(notificacion: Notificacion): boolean
+    + listar(): List<Notificacion>
   }
 
 class RepositorioNotificacionesArchivo
-ConsolaSIGMA --> GestorReclamos
-ConsolaSIGMA --> GestorExpensas
-ConsolaSIGMA --> GestorAccesos
-ConsolaSIGMA --> GestorMantenimiento
-ConsolaSIGMA --> GestorReportes
+
+class RepositorioReclamosMemoria
+
+class RepositorioEquiposMemoria
+
+class RepositorioAutorizacionesMemoria
+
+class RepositorioIngresosMemoria
+
+class RepositorioNotificacionesMemoria
+
+class VentanaSIGMA
+
+interface Interaccion
+
+class OperacionesSIGMA
+
+class AplicacionSIGMA
+
+class Main
+
+class AlmacenArchivos
+
+class DatosSIGMA
 GestorReclamos --> RepositorioReclamos
 GestorExpensas --> RepositorioExpensas
 GestorExpensas --> RepositorioPagos
@@ -150,7 +196,6 @@ RepositorioReclamos <|.. RepositorioReclamosArchivo
 RepositorioEquipos <|.. RepositorioEquiposArchivo
 RepositorioExpensas <|.. RepositorioExpensasMemoria
 RepositorioPagos <|.. RepositorioPagosMemoria
-ConsolaSIGMA --> PlanificadorPlazos
 PlanificadorPlazos --> GestorReclamos
 PlanificadorPlazos --> GestorMantenimiento
 PlanificadorPlazos --> GestorExpensas
@@ -158,4 +203,33 @@ GestorReclamos --> RepositorioNotificaciones
 GestorMantenimiento --> RepositorioNotificaciones
 GestorExpensas --> RepositorioNotificaciones
 RepositorioNotificaciones <|.. RepositorioNotificacionesArchivo
+Interaccion <|.. ConsolaSIGMA
+Interaccion <|.. VentanaSIGMA
+ConsolaSIGMA --> OperacionesSIGMA
+VentanaSIGMA --> OperacionesSIGMA
+OperacionesSIGMA --> Interaccion
+OperacionesSIGMA --> AplicacionSIGMA
+Main ..> AplicacionSIGMA
+Main ..> ConsolaSIGMA
+Main ..> VentanaSIGMA
+AplicacionSIGMA --> GestorReclamos
+AplicacionSIGMA --> GestorExpensas
+AplicacionSIGMA --> GestorAccesos
+AplicacionSIGMA --> GestorMantenimiento
+AplicacionSIGMA --> GestorReportes
+AplicacionSIGMA --> PlanificadorPlazos
+AplicacionSIGMA --> AlmacenArchivos
+AlmacenArchivos --> DatosSIGMA
+RepositorioExpensasArchivo --> AlmacenArchivos
+RepositorioPagosArchivo --> AlmacenArchivos
+RepositorioAutorizacionesArchivo --> AlmacenArchivos
+RepositorioIngresosArchivo --> AlmacenArchivos
+RepositorioReclamosArchivo --> AlmacenArchivos
+RepositorioEquiposArchivo --> AlmacenArchivos
+RepositorioNotificacionesArchivo --> AlmacenArchivos
+RepositorioReclamos <|.. RepositorioReclamosMemoria
+RepositorioEquipos <|.. RepositorioEquiposMemoria
+RepositorioAutorizaciones <|.. RepositorioAutorizacionesMemoria
+RepositorioIngresos <|.. RepositorioIngresosMemoria
+RepositorioNotificaciones <|.. RepositorioNotificacionesMemoria
 @enduml

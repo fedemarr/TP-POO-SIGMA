@@ -16,6 +16,9 @@ class Expensa {
     + interesPendiente(fecha: LocalDate, mora: CalculadoraMora): BigDecimal
     + calcularSaldo(fecha: LocalDate, mora: CalculadoraMora): BigDecimal
     + aplicarImputacion(imputacion: Imputacion): void
+    + Expensa(lote: Lote, periodo: YearMonth, importe: BigDecimal, vencimiento: LocalDate)
+    + estaVencida(fecha: LocalDate): boolean
+    + fechaUltimoMovimiento(): LocalDate
   }
 
 class Pago {
@@ -44,6 +47,7 @@ class AjustePago {
     - fecha: LocalDate
     - importe: BigDecimal
     - motivo: String
+    + agregarContraimputacion(imputacion: Imputacion): void
   }
 
 enum MedioPago {
@@ -67,11 +71,17 @@ class Lote {
     + estaAutorizada(persona: Persona, fecha: LocalDate): boolean
     + calcularDeuda(fecha: LocalDate, mora: CalculadoraMora): BigDecimal
     + actualizarMorosidad(expensas: List<Expensa>, fecha: LocalDate): boolean
+    + agregarResidencia(residencia: Residencia): void
+    + obtenerTitular(fecha: LocalDate): Persona
+    + buscarResidente(documento: String, fecha: LocalDate): Persona
+    + agregarExpensa(expensa: Expensa): void
   }
 
 class CalculadoraMora {
     - tasaMensual: BigDecimal
     + calcular(expensa: Expensa, fecha: LocalDate): BigDecimal
+    + CalculadoraMora(tasaMensual: BigDecimal)
+    ~ interesPorDias(capital: BigDecimal, dias: long): BigDecimal
   }
 Lote "1" *-- "0..*" Expensa
 Lote "1" -- "0..*" Pago

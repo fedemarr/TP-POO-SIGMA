@@ -11,19 +11,24 @@ class GestorExpensas {
     - expensas: RepositorioExpensas
     - pagos: RepositorioPagos
     - mora: CalculadoraMora
-    + GestorExpensas(expensas: RepositorioExpensas, pagos: RepositorioPagos, mora: CalculadoraMora)
+    - notificaciones: RepositorioNotificaciones
+    + GestorExpensas(expensas: RepositorioExpensas, pagos: RepositorioPagos, mora: CalculadoraMora, notificaciones: RepositorioNotificaciones)
     + emitirExpensas(barrio: Barrio, periodo: YearMonth, presupuesto: BigDecimal): void
     + registrarPago(lote: Lote, importe: BigDecimal, medio: MedioPago, fecha: LocalDate): Pago
     + registrarAjuste(pago: Pago, importe: BigDecimal, motivo: String, fecha: LocalDate): AjustePago
     + consultarCuenta(lote: Lote, fecha: LocalDate): BigDecimal
     + aplicarSaldosAFavor(lote: Lote, fecha: LocalDate): void
     + verificarMorosidad(fecha: LocalDate): void
+    + saldoAFavor(lote: Lote): BigDecimal
+    + consultarPagos(lote: Lote): List<Pago>
+    + consultarExpensas(lote: Lote): List<Expensa>
   }
 
 interface RepositorioExpensas {
     + buscarPorLote(lote: Lote): List<Expensa>
     + existePeriodo(periodo: YearMonth): boolean
     + guardar(expensa: Expensa): void
+    + listarLotes(): List<Lote>
   }
 
 interface RepositorioPagos {
@@ -37,10 +42,13 @@ interface RepositorioPagos {
 class CalculadoraMora {
     - tasaMensual: BigDecimal
     + calcular(expensa: Expensa, fecha: LocalDate): BigDecimal
+    + CalculadoraMora(tasaMensual: BigDecimal)
+    ~ interesPorDias(capital: BigDecimal, dias: long): BigDecimal
   }
 
 interface RepositorioNotificaciones {
     + guardarSiNoExiste(notificacion: Notificacion): boolean
+    + listar(): List<Notificacion>
   }
 GestorExpensas --> RepositorioExpensas
 GestorExpensas --> RepositorioPagos
