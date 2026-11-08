@@ -12,8 +12,16 @@ class Barrio {
     - lotes: List<Lote>
     - personal: List<Empleado>
     - equipos: List<Equipo>
+    - sectores: List<Sector>
+    - notificaciones: List<Notificacion>
     + calcularSuperficieTotal(): double
     + obtenerLote(numero: int): Lote
+    + agregarLote(lote: Lote): void
+    + agregarEmpleado(empleado: Empleado): void
+    + buscarEmpleado(legajo: String): Empleado
+    + obtenerSector(nombre: String): Sector
+    + agregarEquipo(equipo: Equipo): void
+    + agregarNotificacion(notificacion: Notificacion): void
   }
 
 class Persona {
@@ -36,6 +44,10 @@ class Lote {
     + estaAutorizada(persona: Persona, fecha: LocalDate): boolean
     + calcularDeuda(fecha: LocalDate, mora: CalculadoraMora): BigDecimal
     + actualizarMorosidad(expensas: List<Expensa>, fecha: LocalDate): boolean
+    + agregarResidencia(residencia: Residencia): void
+    + obtenerTitular(fecha: LocalDate): Persona
+    + buscarResidente(documento: String, fecha: LocalDate): Persona
+    + agregarExpensa(expensa: Expensa): void
   }
 
 class Residencia {
@@ -46,6 +58,7 @@ class Residencia {
     + estaVigente(fecha: LocalDate): boolean
     + autorizar(): void
     + finalizar(fecha: LocalDate): void
+    + Residencia(persona: Persona, tipo: TipoResidente, desde: LocalDate, hasta: LocalDate, autorizada: boolean)
   }
 
 enum TipoResidente {

@@ -60,7 +60,7 @@ Esta sección describe las decisiones de diseño para pasar del diagrama de clas
 
 **Decisión de diseño.** Introducir controladores por módulo. `GestorAccesos` recibe las solicitudes de ingreso y egreso, consulta las autorizaciones y verifica ingresos abiertos. `GestorExpensas` coordina la emisión y el registro de pagos. `GestorReclamos` y `GestorMantenimiento` coordinan los casos de sus módulos. Los gestores delegan las reglas específicas a las entidades y el almacenamiento a los repositorios. La consola recoge los datos, invoca al gestor y muestra el resultado o error.
 
-**Clases involucradas.** Los cuatro gestores, la futura interfaz de consola, las entidades y las interfaces de repositorio correspondientes.
+**Clases involucradas.** Los cuatro gestores, la interfaz de usuario (`ConsolaSIGMA` y `VentanaSIGMA`, que llegan a los gestores a través de `OperacionesSIGMA`), las entidades y las interfaces de repositorio correspondientes.
 
 **Ventaja.** Se define un punto de entrada claro para cada caso de uso, se pueden probar las operaciones sin recorrer el menú y se evita repartir su coordinación por la interfaz. Las secuencias de ingreso y pago deberán comenzar en los gestores correspondientes en lugar de `Barrio`.
 

@@ -32,11 +32,60 @@ Materia: Programación Orientada a Objetos. Docente: Leon Maria Angela.
 - [Índice de diagramas y fuentes editables](docs/uml/README.md)
 - [Estado de entrega y continuación](docs/03-plan-y-decisiones.md)
 
-## Estructura y estado
+## Etapa 2: programa en Java
 
-- docs/: documento de diseño, PDF y fuentes Markdown.
-- docs/uml/: diagramas PlantUML, SVG y PNG.
-- src/: carpeta prevista para el código Java de etapa 2.
-- test/: carpeta prevista para las pruebas de etapa 2.
+### Requisitos
 
-La etapa 1 corresponde al diseño. La aplicación se desarrollará en Java con menú de consola y persistencia en archivos. El código ejecutable, las pruebas y las instrucciones de ejecución se completarán en la etapa 2.
+- Java 17 o superior (JDK). No usa bibliotecas externas.
+
+### Ejecutar
+
+Linux / macOS:
+
+```bash
+bash ejecutar-linux-mac.sh            # interfaz gráfica (Swing)
+bash ejecutar-linux-mac.sh consola    # menú por consola
+```
+
+Windows: doble clic en `ejecutar-windows.bat` (ventana) o, desde una terminal, `ejecutar-windows.bat consola`.
+
+Los datos se guardan en `data/sigma.dat` y se recuperan en la siguiente ejecución. Para empezar de cero, borrar esa carpeta.
+
+### Pruebas
+
+```bash
+bash probar-linux-mac.sh
+```
+
+En Windows: `probar-windows.bat`. Hay ocho pruebas en `test/`; cada una imprime `OK` si todas sus comprobaciones se cumplen.
+
+### Datos de prueba
+
+La primera vez que se ejecuta, el programa crea los 150 lotes del barrio y estos datos:
+
+| Dato | Valores |
+| --- | --- |
+| Titulares | Lote 1: Ana Perez (DNI 30111222). Lote 2: Bruno Gomez (28999888). Lote 3: Carla Diaz (33444555) |
+| Familiar autorizado | Lote 3: Diego Diaz (40111000) |
+| Personal | ADM-01 administradora, GUA-01 guardia de portería, GUA-02 guardia de ronda, MAN-01 electricista, MAN-02 plomera |
+| Equipos | CAM-01 y CAM-02 (cámaras), LUM-01 a LUM-05 (luminarias del sector Calle interna 1) |
+
+Ejemplo: Reclamos > Registrar reclamo, lote 1, DNI 30111222. Después, Asignar responsable con el legajo GUA-01.
+
+### Organización del código
+
+| Paquete | Contenido |
+| --- | --- |
+| `sigma.modelo` | Entidades y enumerados del diagrama de clases final |
+| `sigma.excepciones` | `ReglaNegocioException` y sus subclases |
+| `sigma.gestores` | Controladores de cada módulo, reportes y `PlanificadorPlazos` |
+| `sigma.repositorios` | Interfaces de persistencia |
+| `sigma.persistencia` | Implementaciones en archivo y `AlmacenArchivos` |
+| `sigma.vista` | `ConsolaSIGMA`, `VentanaSIGMA` y las operaciones que comparten |
+| `test/` | Pruebas y repositorios en memoria para probar sin archivos |
+
+### Documentación de la etapa 2
+
+- [Implementación: del diseño al código](docs/07-implementacion.md)
+- [Plan de pruebas (unitarias y funcionales)](docs/08-plan-de-pruebas.md)
+- [Informe final](docs/09-informe-final.md)

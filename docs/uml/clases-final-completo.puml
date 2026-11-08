@@ -2,7 +2,7 @@
 scale max 3800*3800
 skinparam defaultFontName Arial
 skinparam defaultFontSize 14
-title SIGMA - Diagrama de clases final (Etapa 1)
+title SIGMA - Diagrama de clases final (actualizado con la implementacion)
 top to bottom direction
 skinparam classAttributeIconSize 0
 skinparam shadowing false
@@ -16,8 +16,16 @@ package "Barrio y vecinos" {
     - lotes: List<Lote>
     - personal: List<Empleado>
     - equipos: List<Equipo>
+    - sectores: List<Sector>
+    - notificaciones: List<Notificacion>
     + calcularSuperficieTotal(): double
     + obtenerLote(numero: int): Lote
+    + agregarLote(lote: Lote): void
+    + agregarEmpleado(empleado: Empleado): void
+    + buscarEmpleado(legajo: String): Empleado
+    + obtenerSector(nombre: String): Sector
+    + agregarEquipo(equipo: Equipo): void
+    + agregarNotificacion(notificacion: Notificacion): void
   }
   class Persona {
     - nombre: String
@@ -38,6 +46,10 @@ package "Barrio y vecinos" {
     + estaAutorizada(persona: Persona, fecha: LocalDate): boolean
     + calcularDeuda(fecha: LocalDate, mora: CalculadoraMora): BigDecimal
     + actualizarMorosidad(expensas: List<Expensa>, fecha: LocalDate): boolean
+    + agregarResidencia(residencia: Residencia): void
+    + obtenerTitular(fecha: LocalDate): Persona
+    + buscarResidente(documento: String, fecha: LocalDate): Persona
+    + agregarExpensa(expensa: Expensa): void
   }
   class Residencia {
     - tipo: TipoResidente
@@ -47,6 +59,7 @@ package "Barrio y vecinos" {
     + estaVigente(fecha: LocalDate): boolean
     + autorizar(): void
     + finalizar(fecha: LocalDate): void
+    + Residencia(persona: Persona, tipo: TipoResidente, desde: LocalDate, hasta: LocalDate, autorizada: boolean)
   }
   enum TipoResidente {
     TITULAR
@@ -105,6 +118,11 @@ package "Reclamos" {
     + requiereEscalamiento(ahora: LocalDateTime): boolean
     + cerrarPorPlazo(ahora: LocalDateTime): void
     + compareTo(otro: Reclamo): int
+    + Reclamo(numero: int, fecha: LocalDateTime, tipo: TipoReclamo, descripcion: String)
+    + vincular(lote: Lote, solicitante: Persona): void
+    + perteneceA(persona: Persona): boolean
+    + estaPendiente(): boolean
+    + estaEnCursoDe(empleado: Empleado): boolean
   }
   class CambioEstado {
     - fecha: LocalDateTime
@@ -146,6 +164,9 @@ package "Expensas y pagos" {
     + interesPendiente(fecha: LocalDate, mora: CalculadoraMora): BigDecimal
     + calcularSaldo(fecha: LocalDate, mora: CalculadoraMora): BigDecimal
     + aplicarImputacion(imputacion: Imputacion): void
+    + Expensa(lote: Lote, periodo: YearMonth, importe: BigDecimal, vencimiento: LocalDate)
+    + estaVencida(fecha: LocalDate): boolean
+    + fechaUltimoMovimiento(): LocalDate
   }
   class Pago {
     - numero: int
@@ -171,6 +192,7 @@ package "Expensas y pagos" {
     - fecha: LocalDate
     - importe: BigDecimal
     - motivo: String
+    + agregarContraimputacion(imputacion: Imputacion): void
   }
   enum MedioPago {
     EFECTIVO
@@ -193,21 +215,29 @@ package "Equipos y mantenimiento" {
     + registrarFalla(descripcion: String, fecha: LocalDateTime): FallaEquipo
     + cambiarEstado(nuevo: EstadoEquipo): void
     + {abstract} prioridadDeFalla(falladasEnSector: int): PrioridadOrden
+    + registrarFalla(descripcion: String, fecha: LocalDateTime, autor: String): FallaEquipo
+    + fallaAbierta(): FallaEquipo
+    + contieneFalla(falla: FallaEquipo): boolean
+    + getNombreSector(): String
+    + {abstract} getTipo(): String
   }
   class Camara {
     - resolucion: String
     - diasGrabacion: int
     + prioridadDeFalla(falladasEnSector: int): PrioridadOrden
     + requiereAviso(ahora: LocalDateTime): boolean
+    + getTipo(): String
   }
   class Luminaria {
     - tipoLampara: String
     - potencia: double
     + prioridadDeFalla(falladasEnSector: int): PrioridadOrden
+    + getTipo(): String
   }
   class Sector {
     - nombre: String
     + contarLuminariasFalladas(): int
+    + agregarEquipo(equipo: Equipo): void
   }
   class FallaEquipo {
     - fecha: LocalDateTime
@@ -226,6 +256,9 @@ package "Equipos y mantenimiento" {
     + cerrar(fecha: LocalDateTime, tecnico: EmpleadoMantenimiento, descripcion: String): void
     + elevarPrioridad(): void
     + agregarObservacion(texto: String): void
+    + asignarTecnico(tecnico: EmpleadoMantenimiento): void
+    + cerrarSinReparacion(fecha: LocalDateTime, tecnico: EmpleadoMantenimiento, descripcion: String): void
+    + estaAbierta(): boolean
   }
   enum EstadoEquipo {
     OPERATIVO
@@ -252,6 +285,7 @@ package "Visitas y avisos" {
     - recurrente: boolean
     + validarDuracion(): void
     + estaVigente(fecha: LocalDateTime): boolean
+    + esIgualA(otra: Autorizacion): boolean
   }
   class RegistroIngreso {
     - ingreso: LocalDateTime
@@ -267,6 +301,7 @@ package "Visitas y avisos" {
     - referencia: String
     - leida: boolean
     - claveUnica: String
+    + marcarLeida(): void
   }
 }
 
@@ -327,11 +362,40 @@ note bottom of RegistroIngreso
   del mismo documento, aun para otro lote.
 end note
 
-package "Coordinacion de casos de uso" {
+package "Interfaz de usuario" {
   class ConsolaSIGMA {
     + ejecutarMenu(): void
+    + ConsolaSIGMA(aplicacion: AplicacionSIGMA)
   }
+  class VentanaSIGMA {
+    + VentanaSIGMA(aplicacion: AplicacionSIGMA)
+  }
+  interface Interaccion {
+    + pedirTexto(pregunta: String): String
+    + elegir(titulo: String, opciones: String[]): int
+    + mostrar(texto: String): void
+    + mostrarError(texto: String): void
+  }
+  class OperacionesSIGMA {
+    + OperacionesSIGMA(aplicacion: AplicacionSIGMA, vista: Interaccion)
+    + ejecutar(opcion: String): void
+    + revisarPlazos(): void
+  }
+  class AplicacionSIGMA {
+    + AplicacionSIGMA(archivo: Path)
+    + revisarPlazos(): void
+    + guardarCambios(): void
+    + getBarrio(): Barrio
+    + getNotificaciones(): List<Notificacion>
+  }
+  class Main {
+    + {static} main(args: String[]): void
+  }
+}
+package "Coordinacion de casos de uso" {
   class GestorReclamos {
+    - reclamos: RepositorioReclamos
+    - notificaciones: RepositorioNotificaciones
     + registrarReclamo(lote: Lote, solicitante: Persona, tipo: TipoReclamo, descripcion: String, fecha: LocalDateTime): Reclamo
     + asignarReclamo(reclamo: Reclamo, empleado: Empleado, fecha: LocalDateTime): void
     + cambiarEstado(reclamo: Reclamo, empleado: Empleado, nuevo: EstadoReclamo, observacion: String, fecha: LocalDateTime): void
@@ -340,18 +404,24 @@ package "Coordinacion de casos de uso" {
     + consultarSeguimiento(reclamo: Reclamo, vecino: Persona): Reclamo
     + consultarPendientes(ahora: LocalDateTime): List<Reclamo>
     + verificarPlazos(ahora: LocalDateTime): void
+    + GestorReclamos(reclamos: RepositorioReclamos, notificaciones: RepositorioNotificaciones)
+    + buscarReclamo(numero: int): Reclamo
   }
   class GestorExpensas {
     - expensas: RepositorioExpensas
     - pagos: RepositorioPagos
     - mora: CalculadoraMora
-    + GestorExpensas(expensas: RepositorioExpensas, pagos: RepositorioPagos, mora: CalculadoraMora)
+    - notificaciones: RepositorioNotificaciones
+    + GestorExpensas(expensas: RepositorioExpensas, pagos: RepositorioPagos, mora: CalculadoraMora, notificaciones: RepositorioNotificaciones)
     + emitirExpensas(barrio: Barrio, periodo: YearMonth, presupuesto: BigDecimal): void
     + registrarPago(lote: Lote, importe: BigDecimal, medio: MedioPago, fecha: LocalDate): Pago
     + registrarAjuste(pago: Pago, importe: BigDecimal, motivo: String, fecha: LocalDate): AjustePago
     + consultarCuenta(lote: Lote, fecha: LocalDate): BigDecimal
     + aplicarSaldosAFavor(lote: Lote, fecha: LocalDate): void
     + verificarMorosidad(fecha: LocalDate): void
+    + saldoAFavor(lote: Lote): BigDecimal
+    + consultarPagos(lote: Lote): List<Pago>
+    + consultarExpensas(lote: Lote): List<Expensa>
   }
   class GestorAccesos {
     - autorizaciones: RepositorioAutorizaciones
@@ -362,21 +432,35 @@ package "Coordinacion de casos de uso" {
     + registrarEgreso(documento: String, fecha: LocalDateTime): void
   }
   class GestorMantenimiento {
+    - equipos: RepositorioEquipos
+    - notificaciones: RepositorioNotificaciones
     + registrarFalla(equipo: Equipo, autor: String, descripcion: String, fecha: LocalDateTime): FallaEquipo
     + generarOrden(administrador: Administrador, falla: FallaEquipo, tecnico: EmpleadoMantenimiento, fecha: LocalDateTime): OrdenMantenimiento
     + cerrarOrden(orden: OrdenMantenimiento, tecnico: EmpleadoMantenimiento, descripcion: String, fecha: LocalDateTime): void
     + consultarEquipos(ahora: LocalDateTime): List<Equipo>
     + verificarPlazos(ahora: LocalDateTime): void
+    + GestorMantenimiento(equipos: RepositorioEquipos, notificaciones: RepositorioNotificaciones)
+    + registrarEquipo(equipo: Equipo): void
+    + asignarTecnico(orden: OrdenMantenimiento, tecnico: EmpleadoMantenimiento): void
+    + iniciarReparacion(orden: OrdenMantenimiento): void
+    + cerrarOrdenSinReparacion(orden: OrdenMantenimiento, tecnico: EmpleadoMantenimiento, descripcion: String, fecha: LocalDateTime): void
+    + consultarOrdenes(): List<OrdenMantenimiento>
+    + consultarOrdenesAbiertas(equipo: Equipo): List<OrdenMantenimiento>
+    + buscarEquipo(codigo: String): Equipo
+    + buscarOrden(numero: int): OrdenMantenimiento
   }
   class GestorReportes {
     + reclamosPendientes(ahora: LocalDateTime): String
     + morosidad(fecha: LocalDate): String
     + equiposFueraDeServicio(ahora: LocalDateTime): String
     + exportar(texto: String, ruta: String): void
+    + GestorReportes(reclamos: RepositorioReclamos, expensas: RepositorioExpensas, equipos: RepositorioEquipos, mora: CalculadoraMora)
   }
   class CalculadoraMora {
     - tasaMensual: BigDecimal
     + calcular(expensa: Expensa, fecha: LocalDate): BigDecimal
+    + CalculadoraMora(tasaMensual: BigDecimal)
+    ~ interesPorDias(capital: BigDecimal, dias: long): BigDecimal
   }
 }
 package "Contratos de persistencia" {
@@ -384,6 +468,7 @@ package "Contratos de persistencia" {
     + buscarPorLote(lote: Lote): List<Expensa>
     + existePeriodo(periodo: YearMonth): boolean
     + guardar(expensa: Expensa): void
+    + listarLotes(): List<Lote>
   }
   interface RepositorioPagos {
     + siguienteNumero(): int
@@ -409,6 +494,7 @@ package "Contratos de persistencia" {
     + listar(): List<Equipo>
     + guardar(equipo: Equipo): void
     + guardarOrden(orden: OrdenMantenimiento): void
+    + listarOrdenes(): List<OrdenMantenimiento>
   }
 }
 package "Persistencia en archivos" {
@@ -418,10 +504,28 @@ package "Persistencia en archivos" {
   class RepositorioIngresosArchivo
   class RepositorioReclamosArchivo
   class RepositorioEquiposArchivo
+  class AlmacenArchivos {
+    + AlmacenArchivos(ruta: Path, nombreBarrio: String)
+    + getDatos(): DatosSIGMA
+    + guardar(): void
+  }
+  class DatosSIGMA {
+    - reclamos: List<Reclamo>
+    - pagos: List<Pago>
+    - ordenes: List<OrdenMantenimiento>
+    - autorizaciones: List<Autorizacion>
+    - ingresos: List<RegistroIngreso>
+    + getBarrio(): Barrio
+  }
 }
 package "Pruebas" {
   class RepositorioExpensasMemoria
   class RepositorioPagosMemoria
+  class RepositorioReclamosMemoria
+  class RepositorioEquiposMemoria
+  class RepositorioAutorizacionesMemoria
+  class RepositorioIngresosMemoria
+  class RepositorioNotificacionesMemoria
 }
 package "Errores de negocio" {
   class ReglaNegocioException <<exception>>
@@ -432,11 +536,6 @@ package "Errores de negocio" {
   class TransicionInvalidaException <<exception>>
 }
 
-ConsolaSIGMA --> GestorReclamos
-ConsolaSIGMA --> GestorExpensas
-ConsolaSIGMA --> GestorAccesos
-ConsolaSIGMA --> GestorMantenimiento
-ConsolaSIGMA --> GestorReportes
 GestorReclamos --> RepositorioReclamos
 GestorReclamos ..> Reclamo
 GestorExpensas --> RepositorioExpensas
@@ -473,13 +572,14 @@ ReglaNegocioException --|> Exception
 package "Evaluacion de plazos" {
   class PlanificadorPlazos {
     + ejecutar(ahora: LocalDateTime): void
+    + PlanificadorPlazos(reclamos: GestorReclamos, mantenimiento: GestorMantenimiento, expensas: GestorExpensas)
   }
   interface RepositorioNotificaciones {
     + guardarSiNoExiste(notificacion: Notificacion): boolean
+    + listar(): List<Notificacion>
   }
   class RepositorioNotificacionesArchivo
 }
-ConsolaSIGMA --> PlanificadorPlazos
 PlanificadorPlazos --> GestorReclamos
 PlanificadorPlazos --> GestorMantenimiento
 PlanificadorPlazos --> GestorExpensas
@@ -491,5 +591,40 @@ AjustePago "0..1" -- "0..*" Imputacion : identifica contraimputaciones
 note right of OrdenMantenimiento
   Puede esperar tecnico mientras no inicio.
   Al cerrar debe registrar fecha, tecnico y reparacion.
+end note
+Interaccion <|.. ConsolaSIGMA
+Interaccion <|.. VentanaSIGMA
+ConsolaSIGMA --> OperacionesSIGMA
+VentanaSIGMA --> OperacionesSIGMA
+OperacionesSIGMA --> Interaccion
+OperacionesSIGMA --> AplicacionSIGMA
+Main ..> AplicacionSIGMA
+Main ..> ConsolaSIGMA
+Main ..> VentanaSIGMA
+AplicacionSIGMA --> GestorReclamos
+AplicacionSIGMA --> GestorExpensas
+AplicacionSIGMA --> GestorAccesos
+AplicacionSIGMA --> GestorMantenimiento
+AplicacionSIGMA --> GestorReportes
+AplicacionSIGMA --> PlanificadorPlazos
+AplicacionSIGMA --> AlmacenArchivos
+AlmacenArchivos --> DatosSIGMA
+DatosSIGMA --> Barrio
+RepositorioExpensasArchivo --> AlmacenArchivos
+RepositorioPagosArchivo --> AlmacenArchivos
+RepositorioAutorizacionesArchivo --> AlmacenArchivos
+RepositorioIngresosArchivo --> AlmacenArchivos
+RepositorioReclamosArchivo --> AlmacenArchivos
+RepositorioEquiposArchivo --> AlmacenArchivos
+RepositorioNotificacionesArchivo --> AlmacenArchivos
+RepositorioReclamos <|.. RepositorioReclamosMemoria
+RepositorioEquipos <|.. RepositorioEquiposMemoria
+RepositorioAutorizaciones <|.. RepositorioAutorizacionesMemoria
+RepositorioIngresos <|.. RepositorioIngresosMemoria
+RepositorioNotificaciones <|.. RepositorioNotificacionesMemoria
+note bottom of AlmacenArchivos
+  Todos los repositorios de archivo comparten el almacen:
+  el estado completo se guarda en data/sigma.dat,
+  primero en un archivo temporal y luego reemplaza al real.
 end note
 @enduml

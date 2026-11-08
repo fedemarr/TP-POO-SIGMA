@@ -8,6 +8,8 @@ skinparam shadowing false
 hide empty members
 
 class GestorReclamos {
+    - reclamos: RepositorioReclamos
+    - notificaciones: RepositorioNotificaciones
     + registrarReclamo(lote: Lote, solicitante: Persona, tipo: TipoReclamo, descripcion: String, fecha: LocalDateTime): Reclamo
     + asignarReclamo(reclamo: Reclamo, empleado: Empleado, fecha: LocalDateTime): void
     + cambiarEstado(reclamo: Reclamo, empleado: Empleado, nuevo: EstadoReclamo, observacion: String, fecha: LocalDateTime): void
@@ -16,14 +18,27 @@ class GestorReclamos {
     + consultarSeguimiento(reclamo: Reclamo, vecino: Persona): Reclamo
     + consultarPendientes(ahora: LocalDateTime): List<Reclamo>
     + verificarPlazos(ahora: LocalDateTime): void
+    + GestorReclamos(reclamos: RepositorioReclamos, notificaciones: RepositorioNotificaciones)
+    + buscarReclamo(numero: int): Reclamo
   }
 
 class GestorMantenimiento {
+    - equipos: RepositorioEquipos
+    - notificaciones: RepositorioNotificaciones
     + registrarFalla(equipo: Equipo, autor: String, descripcion: String, fecha: LocalDateTime): FallaEquipo
     + generarOrden(administrador: Administrador, falla: FallaEquipo, tecnico: EmpleadoMantenimiento, fecha: LocalDateTime): OrdenMantenimiento
     + cerrarOrden(orden: OrdenMantenimiento, tecnico: EmpleadoMantenimiento, descripcion: String, fecha: LocalDateTime): void
     + consultarEquipos(ahora: LocalDateTime): List<Equipo>
     + verificarPlazos(ahora: LocalDateTime): void
+    + GestorMantenimiento(equipos: RepositorioEquipos, notificaciones: RepositorioNotificaciones)
+    + registrarEquipo(equipo: Equipo): void
+    + asignarTecnico(orden: OrdenMantenimiento, tecnico: EmpleadoMantenimiento): void
+    + iniciarReparacion(orden: OrdenMantenimiento): void
+    + cerrarOrdenSinReparacion(orden: OrdenMantenimiento, tecnico: EmpleadoMantenimiento, descripcion: String, fecha: LocalDateTime): void
+    + consultarOrdenes(): List<OrdenMantenimiento>
+    + consultarOrdenesAbiertas(equipo: Equipo): List<OrdenMantenimiento>
+    + buscarEquipo(codigo: String): Equipo
+    + buscarOrden(numero: int): OrdenMantenimiento
   }
 
 class GestorReportes {
@@ -31,10 +46,12 @@ class GestorReportes {
     + morosidad(fecha: LocalDate): String
     + equiposFueraDeServicio(ahora: LocalDateTime): String
     + exportar(texto: String, ruta: String): void
+    + GestorReportes(reclamos: RepositorioReclamos, expensas: RepositorioExpensas, equipos: RepositorioEquipos, mora: CalculadoraMora)
   }
 
 class PlanificadorPlazos {
     + ejecutar(ahora: LocalDateTime): void
+    + PlanificadorPlazos(reclamos: GestorReclamos, mantenimiento: GestorMantenimiento, expensas: GestorExpensas)
   }
 
 interface RepositorioReclamos {
@@ -47,10 +64,12 @@ interface RepositorioEquipos {
     + listar(): List<Equipo>
     + guardar(equipo: Equipo): void
     + guardarOrden(orden: OrdenMantenimiento): void
+    + listarOrdenes(): List<OrdenMantenimiento>
   }
 
 interface RepositorioNotificaciones {
     + guardarSiNoExiste(notificacion: Notificacion): boolean
+    + listar(): List<Notificacion>
   }
 GestorReclamos --> RepositorioReclamos
 GestorMantenimiento --> RepositorioEquipos
